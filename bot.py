@@ -109,6 +109,6 @@ for linkedin_url in linkedin_urls:
     results = pd.DataFrame(data=set_results, columns=['First', 'Last', 'Job Title', 'Company', 'LinkedIn URL'])
     results.to_excel('results.xlsx', index=False)
 
-    print(str([first_name, last_name, job_title, company, linkedin_url]), "written to 'results.xlsx' successfully!")
+    print(str([first_name, last_name, job_title, company, linkedin_url]))
 
 driver.quit()
