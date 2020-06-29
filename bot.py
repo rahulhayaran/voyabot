@@ -46,6 +46,13 @@ for i in range(queries.shape[0]):
     sleep(0.5)
 
     for i in range(int(query[2]) - 1):
+        from selenium.common.exceptions import NoSuchElementException    
+        try:
+            dumb_ad = driver.find_element_by_class_name('bnp_hfly_cta2')
+            dumb_ad.click()
+        except NoSuchElementException:
+            pass
+
         next_button = driver.find_element_by_xpath('//*[@title="Next page"]')
         next_button.click()
         sleep(0.5)
