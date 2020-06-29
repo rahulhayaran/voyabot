@@ -57,18 +57,18 @@ for i in range(queries.shape[0]):
 profiles = []
 
 for linkedin_url in linkedin_urls:
-    if linkedin_url == "https://www.linkedin.com/in/unavailable/" or linkedin_url == "https://www.linkedin.com/in/andrea-lyttle-04406443":
+    if linkedin_url == 'https://www.linkedin.com/in/unavailable/':
         continue
     driver.get(linkedin_url)
     sleep(5)
     sel = Selector(text=driver.page_source)
 
+    if driver.current_url == 'https://www.linkedin.com/in/unavailable/':
+        continue
+
     name = sel.xpath('//*[starts-with(@class, "' + parameters.name + '")]/text()').extract_first()
     if name:
         name = name.strip()
-
-    if query[0] in name:
-        continue
 
     first_name = name.split(' ')[0].split(',')[0]
     last_name = (name.split(' ')[1] if '(' not in name.split(' ')[1] else name.split(' ')[2]).split(',')[0]
