@@ -92,6 +92,7 @@ for linkedin_url in linkedin_urls:
     if job_title is not None:
         job_title = ' ' + job_title + ' '
         job_title = job_title.replace(' VP ', ' Vice President ').replace(' EVP ', ' External Vice President ').replace(' IVP ', ' Internal Vice President ').replace(' SVP ', ' Senior Vice President ').replace(' AVP ', ' Associate Vice President ')
+        job_title = job_title[1:-1]
 
     company = sel.xpath('//*[starts-with(@class, "' + parameters.company + '")]/text()').extract_first()
     if company:
