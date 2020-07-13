@@ -14,7 +14,7 @@ from tabulate import tabulate
 driver = webdriver.Chrome(parameters.chromedriver)
 
 results = pd.read_excel('results.xlsx')
-results['hash'] = results['Company'].apply(lambda x: x.lower().replace('.com', '').replace(' inc.', '').replace(' llc.', '').replace(' ltd.', '').replace(' inc', '').replace(' llc', '').replace(' ltd', '').strip())
+results['hash'] = results['Company'].apply(lambda x: x.lower().replace('.com', '').replace(' inc.', '').replace(' llc.', '').replace(' ltd.', '').replace(' inc', '').replace(' llc', '').replace(' ltd', '').replace('foundation', '').strip())
 companies = results['hash'].unique()
 
 dic = dict()
