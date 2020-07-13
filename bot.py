@@ -3,6 +3,7 @@ import parameters
 from time import sleep
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import NoSuchElementException
 
 from parsel import Selector
 
@@ -31,7 +32,7 @@ linkedin_urls = []
 for i in range(queries.shape[0]):
     query = queries.iloc[i,:]
 
-    driver.get('https:www.bing.com')
+    driver.get('https://www.bing.com')
     sleep(3)
 
     search_query = driver.find_element_by_name('q')
@@ -45,8 +46,7 @@ for i in range(queries.shape[0]):
     linkedin_urls.extend([url.text.replace(' › ', '/') for url in urls if ('linkedin.com/in/' in url.text)])
     sleep(0.5)
 
-    for i in range(int(query[2]) - 1):
-        from selenium.common.exceptions import NoSuchElementException    
+    for i in range(int(query[2]) - 1):    
         try:
             dumb_ad = driver.find_element_by_class_name('bnp_hfly_cta2')
             dumb_ad.click()

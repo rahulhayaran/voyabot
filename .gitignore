@@ -5,3 +5,4 @@
 *.xlsx
 *.exe
 *parameters.py
+**/company_formats
