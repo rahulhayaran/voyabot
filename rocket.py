@@ -49,24 +49,32 @@ for company in companies:
             pass
         if not cond:
             break
-
-    table = driver.find_element_by_xpath("//*[@class='table table-bordered']")
-    rows = len(table.find_elements_by_xpath("//tr")) - 1
-    cols = len(table.find_elements_by_xpath("//tr[2]/td"))
-    data = []
-    for i in range(1, rows + 1):
-        row = []
-        for j in range(1, cols + 1) :
-            row.append(table.find_element_by_xpath("//tr["+str(i)+"]/td["+str(j)+"]").text)
-        data.append(row)
-    df = pd.DataFrame(data=data, columns=['format', 'example', 'frequency'])
-
-    txt = str(company) + '\n' + tabulate(df, headers='keys', tablefmt='psql', showindex=False)
     
-    print(txt)
+    df = None
+    
+    try:
+        table = driver.find_element_by_xpath("//*[@class='table table-bordered']")
+        rows = len(table.find_elements_by_xpath("//tr")) - 1
+        cols = len(table.find_elements_by_xpath("//tr[2]/td"))
+        data = []
+        for i in range(1, rows + 1):
+            row = []
+            for j in range(1, cols + 1) :
+                row.append(table.find_element_by_xpath("//tr["+str(i)+"]/td["+str(j)+"]").text)
+            data.append(row)
+        df = pd.DataFrame(data=data, columns=['format', 'example', 'frequency'])
 
-    with open('company_formats/' + str(company) + '.txt', 'w') as f:
-        f.write(txt)
+        txt = str(company) + '\n' + tabulate(df, headers='keys', tablefmt='psql', showindex=False)
+
+        print(txt)
+
+        with open('company_formats/' + str(company) + '.txt', 'w') as f:
+            f.write(txt)
+    except NoSuchElementException:
+        pass
+    
+    if df is None:
+        print('could not find data for ' + str(company))
     
     dic[company] = df
 
@@ -83,9 +91,11 @@ def process_df(result, df):
 
 for i in range(results.shape[0]):
     result = results.iloc[i]
-    formats = process_df(result, dic[result['hash']])
-    for f in formats:
-        profiles.append([result['First'], result['Last'], result['Job Title'], result['Company'], result['LinkedIn URL'], f])
+    value = dic[result['hash']]
+    if value is not None:
+        formats = process_df(result, value)
+        for f in formats:
+            profiles.append([result['First'], result['Last'], result['Job Title'], result['Company'], result['LinkedIn URL'], f])
 
 emails = pd.read_excel('emails.xlsx')
 append = pd.DataFrame(profiles, columns=['First', 'Last', 'Job Title', 'Company', 'LinkedIn URL', 'Email'])
