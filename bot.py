@@ -74,7 +74,7 @@ for linkedin_url in linkedin_urls:
         continue
 
     name = sel.xpath('//*[starts-with(@class, "' + parameters.name + '")]/text()').extract_first()
-    if name:
+    if name is not None:
         name = name.strip()
 
     first_name = name.split(' ')[0].split(',')[0]
@@ -95,10 +95,12 @@ for linkedin_url in linkedin_urls:
         job_title = job_title[1:-1]
 
     company = sel.xpath('//*[starts-with(@class, "' + parameters.company + '")]/text()').extract_first()
-    if company:
+    if company is not None:
         company = company.strip()
-    if company[:(min(3, len(company)))] not in query[0]:
-        continue
+        if company[:(min(3, len(company)))] not in query[0]:
+            continue
+    else:
+        company = ''
 
     linkedin_url = driver.current_url
 
