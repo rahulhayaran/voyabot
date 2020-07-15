@@ -85,7 +85,8 @@ profiles = []
 def process_df(result, df):
     def f(z):
         x, y = z.split('@')
-        x = x.replace('jane', result['First'].lower()).replace('doe', result['Last'].lower()).replace('j', result['First'][0].lower()).replace('d', result['Last'][0].lower())
+        x = x.replace('jane', '1').replace('doe', '2').replace('j', '3').replace('d', '4')
+        x = x.replace('1', result['First'].lower()).replace('2', result['Last'].lower()).replace('3', result['First'][0].lower()).replace('4', result['Last'][0].lower())
         return x + '@' + y
     return list(df['example'].apply(f))
 
