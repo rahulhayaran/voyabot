@@ -102,7 +102,7 @@ for linkedin_url in linkedin_urls:
     else:
         company = ''
 
-    linkedin_url = driver.current_url
+    linkedin_url = driver.current_url.split('?originalSubdomain')[0]
 
     profiles.append([first_name, last_name, job_title, company, linkedin_url])
 
