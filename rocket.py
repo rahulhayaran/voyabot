@@ -62,7 +62,7 @@ for company in companies:
             if not cond:
                 break
             
-        df = None
+        df = pd.DataFrame([])
 
         try:
             table = driver.find_element_by_xpath("//*[@class='table table-bordered']")
@@ -85,7 +85,7 @@ for company in companies:
         except NoSuchElementException:
             pass
         
-        if df is None:
+        if df.empty:
             print('could not find data for ' + str(company))
 
         dic[company] = df
@@ -102,7 +102,8 @@ def process_df(result, df):
         x = x.replace('jane', '1').replace('doe', '2').replace('j', '3').replace('d', '4')
         x = x.replace('1', result['First'].lower()).replace('2', result['Last'].lower()).replace('3', result['First'][0].lower()).replace('4', result['Last'][0].lower())
         return x + '@' + y
-    return None if df == None or df.empty() else list(df['example'].apply(f))
+    
+    return None if df.empty else list(df['example'].apply(f))
 
 for i in range(results.shape[0]):
     result = results.iloc[i]
@@ -110,7 +111,7 @@ for i in range(results.shape[0]):
         try:
             value = dic[result['hash']]
             formats = process_df(result, value)
-            if formats != None:
+            if formats is not None:
                 for f in formats:
                     profile = [result['First'], result['Last'], result['Role'], result['Company'], f]
                     print(profile)
