@@ -102,7 +102,7 @@ def process_df(result, df):
         x = x.replace('jane', '1').replace('doe', '2').replace('j', '3').replace('d', '4')
         x = x.replace('1', result['First'].lower()).replace('2', result['Last'].lower()).replace('3', result['First'][0].lower()).replace('4', result['Last'][0].lower())
         return x + '@' + y
-    return None if df != None or df.empty() else list(df['example'].apply(f))
+    return None if df == None or df.empty() else list(df['example'].apply(f))
 
 for i in range(results.shape[0]):
     result = results.iloc[i]
