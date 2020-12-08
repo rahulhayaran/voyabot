@@ -1,17 +1,19 @@
 import parameters
 
 from time import sleep
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import NoSuchElementException
-
-from parsel import Selector
 
 import numpy as np
 import pandas as pd
 
-driver = webdriver.Chrome(parameters.chromedriver)
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+
+## LOAD DRIVER #####################################
+
+driver = webdriver.Chrome(ChromeDriverManager().install())
 driver.get('https://www.linkedin.com/login?trk=homepage-basic_conversion-modal-signin')
+
+## SIGN-IN #########################################
 
 username = driver.find_element_by_xpath('//*[@id="username" and @name="session_key"]')
 username.send_keys(parameters.linkedin_username)
@@ -25,103 +27,85 @@ sign_in_button = driver.find_element_by_xpath('//*[@type="submit"]')
 sign_in_button.click()
 sleep(0.5)
 
-queries = pd.read_excel('queries.xlsx')
+## READ PROFILES ###################################
 
-linkedin_urls = []
+_ = input('\n---\nDone using LinkedIn filters? Press enter to continue')
 
-for i in range(queries.shape[0]):
-    query = queries.iloc[i,:]
+pages = 5
 
-    driver.get('https://www.bing.com')
-    sleep(3)
+driver.execute_script("document.body.style.zoom='30%'")
+url = driver.current_url
+sleep(0.5)
 
-    search_query = driver.find_element_by_name('q')
-    search_query.send_keys('site:linkedin.com/in/ AND "' + str(query[0]) + '" AND "' + str(query[1]) + '"')
+names, tags = [], []
+
+for i in range(1, pages + 1):
+    if i != 1:
+        page = '' if i == 0 else '&page=' + str(i)
+        driver.get(url + page)
+        driver.execute_script("document.body.style.zoom='30%'")
     sleep(0.5)
-
-    search_query.send_keys(Keys.RETURN)
-    sleep(3)
-
-    urls = driver.find_elements_by_class_name('b_attribution')
-    linkedin_urls.extend([url.text.replace(' › ', '/') for url in urls if ('linkedin.com/in/' in url.text)])
+    names.extend([n.text for n in driver.find_elements_by_xpath('//*[@class="name actor-name"]')])
+    tags.extend([t.text for t in driver.find_elements_by_xpath('//*[@class="subline-level-1 t-14 t-black t-normal search-result__truncate"]')])
     sleep(0.5)
-
-    for i in range(int(query[2]) - 1):    
-        try:
-            dumb_ad = driver.find_element_by_class_name('bnp_hfly_cta2')
-            dumb_ad.click()
-        except NoSuchElementException:
-            pass
-
-        next_button = driver.find_element_by_xpath('//*[@title="Next page"]')
-        next_button.click()
-        sleep(0.5)
-
-        urls = driver.find_elements_by_class_name('b_attribution')
-        linkedin_urls.extend([url.text.replace(' › ', '/') for url in urls if ('linkedin.com/in/' in url.text)])
-        sleep(0.5)
-
-profiles = []
-
-for linkedin_url in linkedin_urls:
-    if linkedin_url == 'https://www.linkedin.com/in/unavailable/':
-        continue
-    driver.get(linkedin_url)
-    sleep(5)
-    sel = Selector(text=driver.page_source)
-
-    if driver.current_url == 'https://www.linkedin.com/in/unavailable/':
-        continue
-
-    name = sel.xpath('//*[starts-with(@class, "' + parameters.name + '")]/text()').extract_first()
-    if name is not None:
-        name = name.strip()
-
-    first_name = name.split(' ')[0].split(',')[0]
-    last_name = (name.split(' ')[1] if '(' not in name.split(' ')[1] else name.split(' ')[2]).split(',')[0]
-
-    job_title = None
-    guesses = ['//*[starts-with(@class, "' + parameters.job_title + '")]/text()', '//*[starts-with(@class, "' + parameters.header + '")]/text()']
-    for guess in guesses:
-        job_title = sel.xpath(guess).extract_first()
-        if job_title and sum(map(lambda x: len(x), job_title.split(' '))) > 1:
-            job_title = job_title.strip().split(' at')[0].split(' @')[0].split('...')[0].split('@')[0].split('|')[0].split(' |')[0]
-            break
-        else:
-            job_title = None
-    if job_title is not None:
-        job_title = ' ' + job_title + ' '
-        job_title = job_title.replace(' VP ', ' Vice President ').replace(' EVP ', ' External Vice President ').replace(' IVP ', ' Internal Vice President ').replace(' SVP ', ' Senior Vice President ').replace(' AVP ', ' Associate Vice President ')
-        job_title = job_title[1:-1]
-
-    company = sel.xpath('//*[starts-with(@class, "' + parameters.company + '")]/text()').extract_first()
-    if company is not None:
-        company = company.strip()
-        if company[:(min(3, len(company)))] not in query[0]:
-            continue
-    else:
-        company = ''
-
-    linkedin_url = driver.current_url.split('?originalSubdomain')[0]
-
-    profiles.append([first_name, last_name, job_title, company, linkedin_url])
-
-    results = pd.read_excel('results.xlsx')
-    append = pd.DataFrame(profiles, columns=['First', 'Last', 'Job Title', 'Company', 'LinkedIn URL'])
-    results = results.append(append)
-
-    profile_set = set()
-    set_results = []
-    for i in range(results.shape[0]):
-        result = list(results.iloc[i])
-        hsh = str(result)
-        if hsh not in profile_set:
-            profile_set.add(hsh)
-            set_results.append(result)
-
-    results = pd.DataFrame(data=set_results, columns=['First', 'Last', 'Job Title', 'Company', 'LinkedIn URL'])
-    results.to_excel('results.xlsx', index=False)
-
-    print(str([first_name, last_name, job_title, company, linkedin_url]))
 
 driver.quit()
+
+## PROCESS PROFILES ################################
+
+firsts, lasts, roles, companies = [], [], [], []
+
+for name in names:
+    name_split = name.split(' ')
+    firsts.append(name_split[0])
+    lasts.append(' '.join(name_split[1:]))
+
+for tag in tags:
+    tag_split = max([tag.split(' at '), tag.split(' @ '), tag.split(' — '), tag.split(' - ')], key=lambda t:len(t))
+    roles.append(tag_split[0])
+    companies.append(tag_split[-1] if len(tag_split) > 1 else '-')
+
+def fix_role(role):
+    return role\
+        .replace('Jr.', 'Junior')\
+        .replace('Jr', 'Junior')\
+        .replace('Sr.', 'Senior')\
+        .replace('Sr', 'Senior')\
+        .replace('EVP', 'Executive Vice President')\
+        .replace('SVP', 'Senior Vice President')\
+        .replace('AVP', 'Associate Vice President')\
+        .replace('VP', 'Vice President')\
+        .replace('PM', 'Product Manager')\
+        .replace('SWE', 'Software Engineer')\
+        .replace('DS', 'Data Scientist')\
+        .replace('CEO', 'Chief Executive Officer')\
+        .replace('COO', 'Chief Operating Officer')\
+        .replace('CFO', 'Chief Financial Officer')\
+        .replace('CTO', 'Chief Technology Officer')\
+        .replace('CDO', 'Chief Data Officer')\
+        .replace('CIO', 'Chief Information Officer')\
+        .replace('CMO', 'Chief Marketing Officer')\
+
+roles = [fix_role(role) for role in roles]
+
+arr = np.asarray(list(zip(firsts, lasts, roles, companies, ['-'] * len(firsts))))
+
+for a in arr:
+    print(a[:-1])
+
+results = pd.read_excel('results.xlsx')
+append = pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Company', 'Email'])
+results = results.append(append)
+
+profile_set = set()
+set_results = []
+for i in range(results.shape[0]):
+    hsh = str(list(results.iloc[i, :-1]))
+    if hsh not in profile_set:
+        profile_set.add(hsh)
+        set_results.append(list(results.iloc[i]))
+
+results = pd.DataFrame(data=set_results, columns=['First', 'Last', 'Role', 'Company', 'Email'])
+results.to_excel('results.xlsx', index=False)
+
+print("\n---\nProfiles written to 'results.xlsx' successfully!")

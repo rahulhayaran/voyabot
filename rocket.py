@@ -1,21 +1,28 @@
-import parameters
-
 from time import sleep
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import NoSuchElementException
 
-from parsel import Selector
-
-import numpy as np
 import pandas as pd
 from tabulate import tabulate
 
-driver = webdriver.Chrome(parameters.chromedriver)
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import NoSuchElementException
 
-results = pd.read_excel('results.xlsx')
-results['hash'] = results['Company'].apply(lambda x: x.lower().replace('.com', '').replace(' inc.', '').replace(' llc.', '').replace(' ltd.', '').replace(' inc', '').replace(' llc', '').replace(' ltd', '').replace('foundation', '').strip())
+## LOAD RESULTS ####################################
+
+all_results = pd.read_excel('results.xlsx')
+results = all_results[all_results['Email'] == '-']
+
+print(results['Company'])
+
+results['hash'] = results['Company'].apply(lambda x: x.lower().replace('.com', '').replace(' inc.', '').replace(' llc.', '').replace(' ltd.', '').replace(',', '').replace('-', '').replace(' inc', '').replace(' llc', '').replace(' ltd', '').replace('foundation', '').strip())
 companies = results['hash'].unique()
+
+## LOAD DRIVER #####################################
+
+driver = webdriver.Chrome(ChromeDriverManager().install())
+
+## GET EMAILS ######################################
 
 dic = dict()
 
@@ -41,7 +48,7 @@ for company in companies:
         
         return False
     
-    cond = follow_link()
+    cond = follow_link() if company != '' else False
     
     if cond:
         while True:
@@ -85,6 +92,8 @@ for company in companies:
 
 driver.quit()
 
+## PROCESS EMAILS ##################################
+
 profiles = []
 
 def process_df(result, df):
@@ -102,12 +111,14 @@ for i in range(results.shape[0]):
             value = dic[result['hash']]
             formats = process_df(result, value)
             for f in formats:
-                profiles.append([result['First'], result['Last'], result['Job Title'], result['Company'], result['LinkedIn URL'], f])
+                profile = [result['First'], result['Last'], result['Role'], result['Company'], f]
+                print(profile)
+                profiles.append(profile)
         except KeyError:
             pass
 
 emails = pd.read_excel('emails.xlsx')
-append = pd.DataFrame(profiles, columns=['First', 'Last', 'Job Title', 'Company', 'LinkedIn URL', 'Email'])
+append = pd.DataFrame(profiles, columns=['First', 'Last', 'Role', 'Company', 'Email'])
 emails = emails.append(append)
 
 profile_set = set()
@@ -119,5 +130,8 @@ for i in range(emails.shape[0]):
         profile_set.add(hsh)
         set_emails.append(email)
 
-emails = pd.DataFrame(data=set_emails, columns=['First', 'Last', 'Job Title', 'Company', 'LinkedIn URL', 'Email'])
+emails = pd.DataFrame(data=set_emails, columns=['First', 'Last', 'Role', 'Company', 'Email'])
 emails.to_excel('emails.xlsx', index=False)
+
+all_results['Email'] = all_results['Email'].apply(lambda x: 'in emails.xlsx')
+all_results.to_excel('results.xlsx', index=False)
