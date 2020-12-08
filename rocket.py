@@ -102,7 +102,7 @@ def process_df(result, df):
         x = x.replace('jane', '1').replace('doe', '2').replace('j', '3').replace('d', '4')
         x = x.replace('1', result['First'].lower()).replace('2', result['Last'].lower()).replace('3', result['First'][0].lower()).replace('4', result['Last'][0].lower())
         return x + '@' + y
-    return list(df['example'].apply(f))
+    return None if df['example'] == None else list(df['example'].apply(f))
 
 for i in range(results.shape[0]):
     result = results.iloc[i]
@@ -110,10 +110,11 @@ for i in range(results.shape[0]):
         try:
             value = dic[result['hash']]
             formats = process_df(result, value)
-            for f in formats:
-                profile = [result['First'], result['Last'], result['Role'], result['Company'], f]
-                print(profile)
-                profiles.append(profile)
+            if formats != None:
+                for f in formats:
+                    profile = [result['First'], result['Last'], result['Role'], result['Company'], f]
+                    print(profile)
+                    profiles.append(profile)
         except KeyError:
             pass
 
