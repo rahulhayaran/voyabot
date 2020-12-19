@@ -13,8 +13,6 @@ from selenium.common.exceptions import NoSuchElementException
 all_results = pd.read_excel('results.xlsx')
 results = all_results[all_results['Email'] == '-']
 
-print(results['Company'])
-
 results['hash'] = results['Company'].apply(lambda x: x.lower().replace('.com', '').replace(' inc.', '').replace(' llc.', '').replace(' ltd.', '').replace(',', '').replace('-', '').replace(' inc', '').replace(' llc', '').replace(' ltd', '').replace('foundation', '').strip())
 companies = results['hash'].unique()
 
