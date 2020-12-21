@@ -37,7 +37,7 @@ driver.execute_script("document.body.style.zoom='30%'")
 url = driver.current_url
 sleep(0.5)
 
-names, tags = [], []
+raw_names, raw_tags = [], []
 
 for i in range(1, pages + 1):
     if i != 1:
@@ -45,11 +45,22 @@ for i in range(1, pages + 1):
         driver.get(url + page)
         driver.execute_script("document.body.style.zoom='30%'")
     sleep(0.5)
-    names.extend([n.text for n in driver.find_elements_by_xpath('//*[@class="name actor-name"]')])
-    tags.extend([t.text for t in driver.find_elements_by_xpath('//*[@class="subline-level-1 t-14 t-black t-normal search-result__truncate"]')])
+    blocks = driver.find_elements_by_xpath('//*[@class="search-result__info pt3 pb4 ph0"]')
+    for block in blocks:
+        name = block.find_elements_by_xpath('.//*[@class="name actor-name"]')
+        tag = block.find_elements_by_xpath('.//*[@class="subline-level-1 t-14 t-black t-normal search-result__truncate"]')
+        raw_names.append(name[0].text if name else None)
+        raw_tags.append(tag[0].text if tag else None)
     sleep(0.5)
 
 driver.quit()
+
+names, tags = [], []
+
+for raw_name, raw_tag in zip(raw_names, raw_tags):
+    if raw_name and raw_tag:
+        names.append(raw_name)
+        tags.append(raw_tag)
 
 ## PROCESS PROFILES ################################
 
