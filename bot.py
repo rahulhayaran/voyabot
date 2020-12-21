@@ -85,6 +85,7 @@ def fix_role(role):
         .replace('CDO', 'Chief Data Officer')\
         .replace('CIO', 'Chief Information Officer')\
         .replace('CMO', 'Chief Marketing Officer')\
+        .replace('&', 'and')\
 
 roles = [fix_role(role) for role in roles]
 
