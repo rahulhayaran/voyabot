@@ -10,11 +10,25 @@ from selenium.common.exceptions import NoSuchElementException
 
 ## LOAD RESULTS ####################################
 
-all_results = pd.read_excel('results.xlsx')
+all_results = pd.read_excel('results.xlsx', engine='openpyxl')
 results = all_results[all_results['Email'] == '-']
 
-results['hash'] = results['Company'].apply(lambda x: x.lower().replace('.com', '').replace(' inc.', '').replace(' llc.', '').replace(' ltd.', '').replace(',', '').replace('-', '').replace(' inc', '').replace(' llc', '').replace(' ltd', '').replace('foundation', '').strip())
+def hash_name(x):
+    return x.lower().replace('.com', '')\
+        .replace(' inc.', '')\
+        .replace(' llc.', '')\
+        .replace(' ltd.', '')\
+        .replace(',', '')\
+        .replace('-', '')\
+        .replace(' inc', '')\
+        .replace(' llc', '')\
+        .replace(' ltd', '')\
+        .replace('foundation', '')\
+        .strip()
+
+results['hash'] = results['Company'].apply(hash_name)
 companies = results['hash'].unique()
+found_companies = []
 
 ## LOAD DRIVER #####################################
 
@@ -46,22 +60,24 @@ for company in companies:
         
         return False
     
-    cond = follow_link() if company != '' else False
+    is_url = follow_link() if company != '' else False
     
-    if cond:
+    if is_url:
+        # check if the site is really a rocketreach table
         while True:
-            cond = True
+            is_url = True
             try:
                 dumb_ad = driver.find_element_by_class_name('modal-title ng-binding ng-scope')
                 follow_link()
             except NoSuchElementException:
-                cond = False
+                is_url = False
                 pass
-            if not cond:
+            if not is_url:
                 break
             
         df = pd.DataFrame([])
 
+        # try getting a rocketreach table
         try:
             table = driver.find_element_by_xpath("//*[@class='table table-bordered']")
             rows = len(table.find_elements_by_xpath("//tr")) - 1
@@ -76,6 +92,7 @@ for company in companies:
 
             txt = str(company) + '\n' + tabulate(df, headers='keys', tablefmt='psql', showindex=False)
 
+            found_companies.append(company)
             print(txt)
 
             with open('company_formats/' + str(company) + '.txt', 'w') as f:
@@ -119,7 +136,7 @@ for i in range(results.shape[0]):
         except KeyError:
             pass
 
-emails = pd.read_excel('emails.xlsx')
+emails = pd.read_excel('emails.xlsx', engine='openpyxl')
 append = pd.DataFrame(profiles, columns=['First', 'Last', 'Role', 'Company', 'Email'])
 emails = emails.append(append)
 
@@ -133,7 +150,9 @@ for i in range(emails.shape[0]):
         set_emails.append(email)
 
 emails = pd.DataFrame(data=set_emails, columns=['First', 'Last', 'Role', 'Company', 'Email'])
-emails.to_excel('emails.xlsx', index=False)
+emails.to_excel('emails.xlsx', index=False, engine='openpyxl')
 
-all_results['Email'] = all_results['Email'].apply(lambda x: 'in emails.xlsx')
-all_results.to_excel('results.xlsx', index=False)
+for i in range(all_results.shape[0]):
+    all_results['Email'][i] = 'in emails.xlsx' if all_results['Email'][i] == 'in emails.xlsx' or hash_name(all_results['Company'][i]) in found_companies else 'NEED TO SOURCE MANUALLY!!!'
+
+all_results.to_excel('results.xlsx', index=False, engine='openpyxl')

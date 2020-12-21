@@ -105,7 +105,7 @@ arr = np.asarray(list(zip(firsts, lasts, roles, companies, ['-'] * len(firsts)))
 for a in arr:
     print(a[:-1])
 
-results = pd.read_excel('results.xlsx')
+results = pd.read_excel('results.xlsx', engine='openpyxl')
 append = pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Company', 'Email'])
 results = results.append(append)
 
@@ -118,6 +118,6 @@ for i in range(results.shape[0]):
         set_results.append(list(results.iloc[i]))
 
 results = pd.DataFrame(data=set_results, columns=['First', 'Last', 'Role', 'Company', 'Email'])
-results.to_excel('results.xlsx', index=False)
+results.to_excel('results.xlsx', index=False, engine='openpyxl')
 
 print("\n---\nProfiles written to 'results.xlsx' successfully!")
