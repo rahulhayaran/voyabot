@@ -4,3 +4,4 @@ pandas
 parsel
 selenium
 webdriver-manager
+tabulate
