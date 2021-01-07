@@ -109,9 +109,15 @@ driver.quit()
 
 ## PROCESS EMAILS ##################################
 
+dupes = results[results['Last'].str.contains(" ") | results['Last'].str.contains("-")]
+dupes['Last'] = dupes['Last'].str.replace('-', ' ').str.split().str[-1]
+results['Last'] = results['Last'].str.replace('-', '').str.replace(' ', '')
+results = pd.concat([results, dupes])
+
 profiles = []
 
 def process_df(result, df):
+
     def f(z):
         if z is not None and '@' in z:
             x, y = z.split('@')
