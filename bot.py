@@ -47,13 +47,13 @@ for query in queries:
 
         search = driver.find_element_by_xpath('//*[@class="search-global-typeahead__input always-show-placeholder"]')
         search.send_keys(Keys.CONTROL + "a")
-        sleep(0.8)
+        sleep(1.5)
 
         search.send_keys(Keys.DELETE)
-        sleep(0.8)
+        sleep(1.5)
 
         search.send_keys(role + '\n')
-        sleep(0.8)
+        sleep(1.5)
 
         driver.execute_script("document.body.style.zoom='30%'")
         url = driver.current_url
