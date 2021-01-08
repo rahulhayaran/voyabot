@@ -1,3 +1,5 @@
+import parameters
+
 from time import sleep
 
 import pandas as pd
@@ -109,15 +111,14 @@ driver.quit()
 
 ## PROCESS EMAILS ##################################
 
-dupes = results[results['Last'].str.contains(" ") | results['Last'].str.contains("-")]
-dupes['Last'] = dupes['Last'].str.replace('-', ' ').str.split().str[-1]
-results['Last'] = results['Last'].str.replace('-', '').str.replace(' ', '')
-results = pd.concat([results, dupes])
+# dupes = results[results['Last'].str.contains(" ") | results['Last'].str.contains("-")]
+# dupes['Last'] = dupes['Last'].str.replace('-', ' ').str.split().str[-1]
+# results['Last'] = results['Last'].str.replace('-', '').str.replace(' ', '')
+# results = pd.concat([results, dupes])
 
 profiles = []
 
 def process_df(result, df):
-
     def f(z):
         if z is not None and '@' in z:
             x, y = z.split('@')
@@ -125,8 +126,18 @@ def process_df(result, df):
             x = x.replace('1', result['First'].lower()).replace('2', result['Last'].lower()).replace('3', result['First'][0].lower()).replace('4', result['Last'][0].lower())
             return x + '@' + y
         return None
-    
-    return None if df.empty else list(df['example'].apply(f))
+
+    if df.empty:
+        return None 
+    else:
+        df['frequency'] = df['frequency'].apply(lambda x: float(x.replace('%', '') if type(x) == str else x))
+        
+        df = df[df['frequency'] >= parameters.frequency_threshold]
+
+        if list(df[df['format'] == 'first']['frequency'])[0] < parameters.first_at_threshold:
+            df = df[df['format'] != 'first']
+
+        return list(df['example'].apply(f))
 
 for i in range(results.shape[0]):
     result = results.iloc[i]
