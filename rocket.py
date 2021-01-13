@@ -46,7 +46,7 @@ for company in companies:
         sleep(3)
 
         search_query = driver.find_element_by_name('q')
-        search_query.send_keys('"rocket reach"+' + '"' + str(company) + '"' + '+"email format"')
+        search_query.send_keys('"site: rocketreach.co" + ' + '"' + str(company) + '"' + ' + "email format"')
         sleep(0.5)
 
         search_query.send_keys(Keys.RETURN)
