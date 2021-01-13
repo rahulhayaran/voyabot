@@ -94,6 +94,8 @@ def is_name(names):
             and 'They/' not in name\
             and 'Ze/' not in name:
             proper_names.append(name)
+    if len(proper_names) == 0:
+        proper_names.append('-')
     return proper_names
 
 def keep_tag(tag):
