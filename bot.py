@@ -53,7 +53,7 @@ for query in queries:
         sleep(0.8)
 
         search.send_keys(role + '\n')
-        sleep(0.8)
+        sleep(1.5)
 
         driver.execute_script("document.body.style.zoom='30%'")
         url = driver.current_url
@@ -66,10 +66,14 @@ for query in queries:
                 driver.execute_script("document.body.style.zoom='30%'")
             sleep(0.7)
 
-            blocks = driver.find_elements_by_xpath('//*[@class="search-result__wrapper"]')
+            blocks = driver.find_elements_by_xpath('//*[@class="entity-result__item"]')
+            print(blocks)
             for block in blocks:
-                name = block.find_elements_by_xpath('.//*[@class="name actor-name"]')
-                tag = block.find_elements_by_xpath('.//*[@class="subline-level-1 t-14 t-black t-normal search-result__truncate"]')
+                name = block.find_elements_by_xpath('.//*[@aria-hidden="true"]')
+                tag = block.find_elements_by_xpath('.//*[@class="entity-result__primary-subtitle t-14 t-black"]')
+                # link = block.find_elements_by_xpath('.//*[@class="app-aware-link"]')
+                # if link:
+                #     print(link[0].get_attribute('href'))
                 if name and tag:
                     names.append(name[0].text)
                     tags.append(tag[0].text)
