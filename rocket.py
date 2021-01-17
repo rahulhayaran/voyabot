@@ -53,7 +53,7 @@ for company in companies:
         sleep(3)
 
         urls = driver.find_elements_by_class_name('b_attribution')
-        urls = [url.text.replace(' › ', '/') for url in urls if ('rocketreach.co' in url.text or 'email-format' in url.text)]
+        urls = [url.text.replace(' › ', '/') for url in urls if ('rocketreach.co' in url.text and 'email-format' in url.text)]
         if len(urls) > 0:
             url = urls[0] if 'https://' in urls[0] else 'https://' + urls[0]
             driver.get(url)
@@ -111,10 +111,10 @@ driver.quit()
 
 ## PROCESS EMAILS ##################################
 
-# dupes = results[results['Last'].str.contains(" ") | results['Last'].str.contains("-")]
-# dupes['Last'] = dupes['Last'].str.replace('-', ' ').str.split().str[-1]
-# results['Last'] = results['Last'].str.replace('-', '').str.replace(' ', '')
-# results = pd.concat([results, dupes])
+dupes = results[results['Last'].str.contains(" ") | results['Last'].str.contains("-")]
+dupes['Last'] = dupes['Last'].str.replace('-', ' ').str.split().str[-1]
+results['Last'] = results['Last'].str.replace('-', '').str.replace(' ', '')
+results = pd.concat([results, dupes])
 
 profiles = []
 
@@ -133,8 +133,9 @@ def process_df(result, df):
         df['frequency'] = df['frequency'].apply(lambda x: float(x.replace('%', '') if type(x) == str else x))
         
         df = df[df['frequency'] >= parameters.frequency_threshold]
-
-        if list(df[df['format'] == 'first']['frequency'])[0] < parameters.first_at_threshold:
+        
+        first = list(df[df['format'] == 'first']['frequency'])
+        if first and len(first) > 0 and first[0] < parameters.first_at_threshold:
             df = df[df['format'] != 'first']
 
         return list(df['example'].apply(f))
@@ -147,14 +148,14 @@ for i in range(results.shape[0]):
             formats = process_df(result, value)
             if formats is not None:
                 for f in formats:
-                    profile = [result['First'], result['Last'], result['Role'], result['Company'], f]
+                    profile = [result['First'], result['Last'], result['Role'], result['Company'], result['Link'], f]
                     print(profile)
                     profiles.append(profile)
         except KeyError:
             pass
 
 emails = pd.read_excel('emails.xlsx', engine='openpyxl')
-append = pd.DataFrame(profiles, columns=['First', 'Last', 'Role', 'Company', 'Email'])
+append = pd.DataFrame(profiles, columns=['First', 'Last', 'Role', 'Company', 'Link', 'Email'])
 emails = emails.append(append)
 
 profile_set = set()
@@ -166,7 +167,7 @@ for i in range(emails.shape[0]):
         profile_set.add(hsh)
         set_emails.append(email)
 
-emails = pd.DataFrame(data=set_emails, columns=['First', 'Last', 'Role', 'Company', 'Email'])
+emails = pd.DataFrame(data=set_emails, columns=['First', 'Last', 'Role', 'Company', 'Link', 'Email'])
 emails.to_excel('emails.xlsx', index=False, engine='openpyxl')
 
 for i in range(all_results.shape[0]):

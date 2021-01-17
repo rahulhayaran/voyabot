@@ -5,3 +5,4 @@ parsel
 selenium
 webdriver-manager
 tabulate
+unidecode
