@@ -85,9 +85,11 @@ for query in queries:
             sleep(0.7)
 
     for scraped_name, scraped_link in zip(scraped_names, scraped_links):
+        print('outside', scraped_name, scraped_link)
         if scraped_link and 'search' not in scraped_link:
+            print('inside', scraped_name, scraped_link)
             driver.get(scraped_link)
-            sleep(0.5)
+            sleep(0.8)
 
             raw_names.append(scraped_name)
             raw_links.append(scraped_link)
@@ -109,20 +111,24 @@ for query in queries:
                 company_block = option1[0].find_elements_by_xpath('.//*[@class="t-16 t-black t-bold"]')
                 if len(company_block) > 0:
                     raw_company = safe_html_read(company_block[0].find_elements_by_tag_name('span'), -1)
+                print('option1', scraped_name, raw_role, raw_company)
             elif len(option2) > 0:
                 raw_role = safe_html_read(option2[0].find_elements_by_xpath('.//*[@class="t-16 t-black t-bold"]'))
                 hail_mary = False if raw_role != '-' else True
                 raw_company = safe_html_read(option2[0].find_elements_by_xpath('.//*[@class="pv-entity__secondary-title t-14 t-black t-normal"]'))
+                print('option2', scraped_name, raw_role, raw_company)
             
             if hail_mary and len(option3) > 0:
                 raw_role = safe_html_read(option3[0].find_elements_by_xpath('.//*[@class="t-16 t-black t-bold"]'))
                 hail_mary = False
                 raw_company = safe_html_read(option3[0].find_elements_by_xpath('.//*[@class="pv-entity__secondary-title t-14 t-black t-normal"]'))
+                print('option3', scraped_name, raw_role, raw_company)
             
             if hail_mary and len(option4) > 0:
                 raw_role = safe_html_read(option4[0].find_elements_by_xpath('.//*[@class="t-16 t-black t-bold"]'))
                 hail_mary = False
                 raw_company = safe_html_read(option4[0].find_elements_by_xpath('.//*[@class="pv-entity__secondary-title t-14 t-black t-normal"]'))
+                print('option4', scraped_name, raw_role, raw_company)
 
             raw_roles.append(raw_role)
             raw_companies.append(raw_company)
@@ -164,6 +170,7 @@ def get_name(names):
             and 'PMP' not in name\
             and 'SCPM' not in name\
             and 'PhD' not in name\
+            and 'SPHR' not in name\
             and 'MD' not in name\
             and 'JD' not in name\
             and 'He/' not in name\
