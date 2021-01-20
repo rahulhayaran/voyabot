@@ -95,6 +95,8 @@ for query in queries:
             option1 = driver.find_elements_by_xpath('//*[@class="pv-profile-section__card-item-v2 pv-profile-section pv-position-entity ember-view"]')
             option2 = driver.find_elements_by_xpath('//*[@class="pv-entity__summary-info pv-entity__summary-info--background-section mb2"]')
             option3 = driver.find_elements_by_xpath('//*[@class="full-width ember-view"]')
+            option4 = driver.find_elements_by_xpath('//*[@class="pv-entity__summary-info pv-entity__summary-info--background-section "]')
+            option5 = driver.find_elements_by_xpath('//*[@class="pv-entity__summary-info pv-entity__summary-info--background-section"]')
 
             raw_role, raw_company = '-', '-'
 
@@ -113,9 +115,20 @@ for query in queries:
                 hail_mary = False if raw_role != '-' else True
                 raw_company = safe_html_read(option2[0].find_elements_by_xpath('.//*[@class="pv-entity__secondary-title t-14 t-black t-normal"]'))
             
-            if hail_mary:
+            if hail_mary and len(option3) > 0:
                 raw_role = safe_html_read(option3[0].find_elements_by_xpath('.//*[@class="t-16 t-black t-bold"]'))
+                hail_mary = False
                 raw_company = safe_html_read(option3[0].find_elements_by_xpath('.//*[@class="pv-entity__secondary-title t-14 t-black t-normal"]'))
+            
+            if hail_mary and len(option4) > 0:
+                raw_role = safe_html_read(option4[0].find_elements_by_xpath('.//*[@class="t-16 t-black t-bold"]'))
+                hail_mary = False
+                raw_company = safe_html_read(option4[0].find_elements_by_xpath('.//*[@class="pv-entity__secondary-title t-14 t-black t-normal"]'))
+
+            if hail_mary and len(option5) > 0:
+                raw_role = safe_html_read(option5[0].find_elements_by_xpath('.//*[@class="t-16 t-black t-bold"]'))
+                hail_mary = False
+                raw_company = safe_html_read(option5[0].find_elements_by_xpath('.//*[@class="pv-entity__secondary-title t-14 t-black t-normal"]'))
 
             raw_roles.append(raw_role)
             raw_companies.append(raw_company)
