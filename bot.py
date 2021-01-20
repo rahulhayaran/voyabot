@@ -54,7 +54,7 @@ for query in queries:
         sleep(0.5)
 
         search = driver.find_element_by_xpath('//*[@class="search-global-typeahead__input always-show-placeholder"]')
-        search.send_keys(Keys.COMMAND + "a")
+        search.send_keys(Keys.COMMAND + Keys.CONTROL + "a")
         sleep(0.8)
 
         search.send_keys(Keys.DELETE)
