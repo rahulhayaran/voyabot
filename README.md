@@ -43,7 +43,7 @@ git pull
 
 ### If you want to search LinkedIn:
 
-2. Fill in `queries.xlsx` with the Roles you are interested in. Every row corresponds to a new Firm. Within a single row, enter a spaced-comma list of the Roles you want for that specific firm. For instance, if I was trying to search for Machine Learning Engineers and Software Engineers at Firm A and Product Managers and Data Scientists at Firm B, I'd enter the following
+2. Fill in `queries.xlsx` with the `Role`s you are interested in. Every row corresponds to a new `Firm`. Within a single row, enter a spaced-comma list of the `Role`s you want for that specific `Firm`. For instance, if I was trying to search for Machine Learning Engineers and Software Engineers at Firm A and Product Managers and Data Scientists at Firm B, I'd enter the following
 ```python
 ----------------------------------------------
 |Machine Learning Engineer, Software Engineer|
@@ -65,7 +65,7 @@ python3 am_linkedin.py
 
 ### If you want to generate emails via RocketReach:
 
-2. Make sure you have a 'full' `results.xlsx` that has some non-generated emails (they'll be annotated with `Haven's Tried Yet :/` in the `Found Email?` column). Check to see there are no typos in their First, Last, or Firm columns (you can validate by going to Link). This information will be used to generate emails, so it's important it's all correct!
+2. Make sure you have a 'full' `results.xlsx` that has some non-generated emails (they'll be annotated with `Haven's Tried Yet :/` in the `Found Email?` column). Check to see there are no typos in their `First`, `Last`, or `Firm` columns (you can validate by going to `Link`). This information will be used to generate emails, so it's important it's all correct!
 
 3. Be sure to close `results.xlsx` after you finish checking!
 
