@@ -25,7 +25,7 @@ LINKEDIN_USERNAME = # type your LinkedIn username here in single quotes
 LINKEDIN_PASSWORD = # type your LinkedIn password here in single quotes
 LINKEDIN_PAGES = 5
 LINKEDIN_ROLES_TO_REMOVE = ['Intern', 'Contractor']  # these are roles you want removed from your searches
-LINKEDIN_SCHOOLS_TO_FLAG = ['Berkeley', 'Haas']  # these are schools whose alumni are tracked
+LINKEDIN_SCHOOLS_TO_FLAG = ['Berkeley', 'Haas']  # these are schools whose alumni you want tracked
 
 # RocketBot
 ROCKET_GENERAL_TEMPLATE_FREQ_THRESHOLD = 0.0  # this is the minimum frequency an email template must have on RocketReach to be included
@@ -64,7 +64,7 @@ git pull
 python3 am_linkedin.py
 ```
 
-5. When prompted (you'll see a `Done using LinkedIn filters? Press enter to continue`), enter the newly opened LinkedIn window and enter your Firm filters (the bot will enter your Role filters as per `queries.xlsx`). Note you'll have to repeat this step for every row you have in `queries.xlsx`.
+5. When prompted (you'll see a `Done using LinkedIn filters? Press enter to continue`), enter the newly opened LinkedIn window and enter your `Firm` filters (the bot will enter your `Role` filters as per `queries.xlsx`). Note you'll have to repeat this step for every row you have in `queries.xlsx`.
 
 6. Sit back and relax! Your results will appear in `results.xlsx`!
 
