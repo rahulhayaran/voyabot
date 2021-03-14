@@ -74,4 +74,4 @@ python3 am_linkedin.py
 python3 am_rocket.py
 ```
 
-5. Sit back and relax! Your results will appear in `emails.xlsx`. From there copy over to YMM to send out your emails (reach out to Tiffany for details on how that works).
+5. Sit back and relax! Your results will appear in `emails.xlsx`. From there copy over to YAMM to send out your emails (reach out to Tiffany for details on how that works).
