@@ -8,14 +8,15 @@ This is the Voyager LinkedIn Bot (fondly referred to as Voyabot). It automates L
 
 1. Get Python (see [here](https://inst.eecs.berkeley.edu/~cs61a/sp20/lab/lab00/) for full setup details).
 
-2. Use the package manager [`pip`](https://pip.pypa.io/en/stable/) to install all necessary packages.
-```bash 
-pip install -r requirements.txt
-```
-
-3. Clone the repository.
+2. Clone the repository.
 ```bash
 git clone https://github.com/rahulhayaran/voyabot.git
+```
+
+3. `cd` into the repo and use the package manager [`pip`](https://pip.pypa.io/en/stable/) to install all necessary packages.
+```bash
+cd voyabot
+pip install -r requirements.txt
 ```
 
 4. Create a file called `parameters.py` and fill it up with the appropriate information. An example is provided below
