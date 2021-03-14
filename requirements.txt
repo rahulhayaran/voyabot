@@ -1,8 +1,7 @@
-numpy==1.19.3
+numpy
 openpyxl
 pandas
 parsel
 selenium
 webdriver-manager
-tabulate
 unidecode
