@@ -65,7 +65,7 @@ python3 am_linkedin.py
 
 ### If you want to generate emails via RocketReach:
 
-2. Make sure you have a 'full' `results.xlsx` that have some non-generated emails (they'll be annotated with `Haven's Tried Yet :/` in the `Found Email?` column). Check to see there are no typos in their First, Last, or Firm columns (you can validate by going to Link). This information will be used to generate emails, so it's important it's all correct!
+2. Make sure you have a 'full' `results.xlsx` that has some non-generated emails (they'll be annotated with `Haven's Tried Yet :/` in the `Found Email?` column). Check to see there are no typos in their First, Last, or Firm columns (you can validate by going to Link). This information will be used to generate emails, so it's important it's all correct!
 
 3. Be sure to close `results.xlsx` after you finish checking!
 
