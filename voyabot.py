@@ -250,7 +250,7 @@ class RocketBot(VoyaBot):
         self.inputs.clear()
         self.inputs.write(self.inputs_df)
 
-        return pd.DataFrame(emails, columns=self.inputs_df.columns[:-1] + ['Email'])
+        return pd.DataFrame(emails, columns=self.inputs_df.columns)
 
     # Utilities
 
