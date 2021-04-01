@@ -157,6 +157,7 @@ class LinkedInBot(VoyaBot):
         return self.driver.current_url
 
     def process_search(self, role: str) -> str:
+        sleep(0.8)
         search = self.driver.find_element_by_xpath('//*[@class="search-global-typeahead__input always-show-placeholder"]')
     
         search.send_keys(Keys.COMMAND + Keys.CONTROL + "a")
@@ -273,7 +274,7 @@ class RocketBot(VoyaBot):
             sleep(3)
             break
 
-        table = self.driver.find_elements_by_xpath("//*[@class='table table-bordered']")
+        table = self.driver.find_elements_by_xpath("//*[@class='table']")
         if len(table) > 0: 
             table, data = table[0], []
             rows, cols = len(table.find_elements_by_xpath("//tr")) - 1, len(table.find_elements_by_xpath("//tr[2]/td"))

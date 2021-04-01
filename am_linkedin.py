@@ -11,8 +11,6 @@ outputs = Sheet('results.xlsx')
 bot = LinkedInBot(inputs)
 df = bot.scrape_data()
 
-print('done')
-
 def f(x):
     for role in LINKEDIN_ROLES_TO_REMOVE:
         if role.lower() in x.lower():
