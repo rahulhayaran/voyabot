@@ -76,6 +76,9 @@ class LinkedInBot(VoyaBot):
                     self.driver.execute_script("document.body.style.zoom='30%'")
                     sleep(0.8)
 
+                    if 'headless' in link or 'search' in link:
+                        continue
+
                     first, last = self.scrape_name()
                     role, firm = self.scrape_xp()
                     schools = self.scrape_schools()
@@ -184,8 +187,7 @@ class LinkedInBot(VoyaBot):
             blocks = self.driver.find_elements_by_class_name('entity-result__item')
             for block in blocks:
                 scraped_link = block.find_elements_by_class_name('app-aware-link')
-                if 'headless' not in scraped_link and 'search' not in scraped_link:
-                    scraped_links.append(scraped_link[0].get_attribute('href'))
+                scraped_links.append(scraped_link[0].get_attribute('href'))
             sleep(0.7)
         return scraped_links
 
