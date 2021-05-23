@@ -118,7 +118,7 @@ class LinkedInBot(VoyaBot):
                     valid_phrases.append(phrase)
             return valid_phrases if len(valid_phrases) > 0 else ['-']
 
-        name = safe_html_read(self.driver.find_elements_by_xpath('//*[@class="inline t-24 t-black t-normal break-words"]'))[0]
+        name = safe_html_read(self.driver.find_elements_by_xpath('//*[@class="text-heading-xlarge inline t-24 v-align-middle break-words"]'))[0]
         valid_phrases = split_name(name.replace('(', ' ').replace(')', ' ').replace(',', ' ').replace('.', '').split(' '))
         first = unidecode.unidecode(valid_phrases[0].title())
         last = unidecode.unidecode(valid_phrases[-1].title())
