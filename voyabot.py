@@ -273,7 +273,7 @@ class RocketBot(VoyaBot):
         for url in urls:
             url = urls[0] if 'https://' in urls[0] else 'https://' + urls[0]
             self.driver.get(url)
-            sleep(3)
+            sleep(5)
             break
 
         table = self.driver.find_elements_by_xpath("//*[@class='table']")
