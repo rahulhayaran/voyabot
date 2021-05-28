@@ -4,6 +4,7 @@ from sheet import *
 import pandas as pd
 import unidecode
 from time import sleep
+from selenium.common.exceptions import NoSuchElementException
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
@@ -62,6 +63,7 @@ class LinkedInBot(VoyaBot):
         sleep(0.5)
 
     def scrape_data(self) -> pd.DataFrame:
+
         queries = self.inputs.get_queries()
         arr = []
 
@@ -72,19 +74,26 @@ class LinkedInBot(VoyaBot):
                 sleep(0.5)
                 links = self.do_search(self.process_search(search))
                 for link in links:
-                    self.driver.get(link)
-                    self.driver.execute_script("document.body.style.zoom='30%'")
-                    sleep(0.8)
 
-                    if 'headless' in link or 'search' in link:
-                        continue
+                    try:
+                        self.driver.get(link)
+                        self.driver.execute_script("document.body.style.zoom='10%'")
+                        sleep(0.8)
 
-                    first, last = self.scrape_name()
-                    role, firm = self.scrape_xp()
-                    schools = self.scrape_schools()
-                    skills = self.scrape_skills()
+                        if 'headless' in link or 'search' in link:
+                            continue
 
-                    arr.append([first, last, role, firm, ' | '.join(schools), ' | '.join(skills), link])
+                        first, last = self.scrape_name()
+                        role, firm = self.scrape_xp()
+                        schools = self.scrape_schools()
+                        skills = self.scrape_skills()
+
+                        arr.append([first, last, role, firm, ' | '.join(schools), ' | '.join(skills), link])
+                    
+                    except NoSuchElementException:
+                        
+                        print("Profile incomplete")
+
 
         return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools', 'Skills', 'Link'])
 
@@ -223,30 +232,38 @@ class RocketBot(VoyaBot):
                                .replace('foundation', '')\
                                .strip()
 
-        firms = [firm for firm in self.inputs_df['Firm'].apply(clean_firm).unique() if len(firm) > 0]
 
         firms_df = dict()
-        for firm in firms:
-            df = self.do_search(firm)
-            if df is not None and df.iloc[0][0] != '-':
-                firms_df[firm] = self.clean_df(df)
-                
+
         for i, row in self.inputs_df.iterrows():
+
             if row['Found Email?'] != 'Yup :)':
                 firm = clean_firm(row['Firm'])
-                if firm in firms_df:
+
+                # find firm if new
+                if firm not in firms_df:
+                    df = self.do_search(firm)
+                    if df is not None and df.iloc[0][0] != '-':
+                        firms_df[firm] = self.clean_df(df)
+                    else:
+                        firms_df[firm] = None
+                
+                # else check valid
+                elif firms_df[firm] is not None:
                     df = firms_df[firm]
                     for template in df['template']:
                         email, address = template.split('@')
                         email = email.replace('jane', '1').replace('doe', '2').replace('j', '3').replace('d', '4')
 
-                        def clean_name(name):
+                        def clean_first(name):
+                            return name.lower().replace('-', ' ').split(' ')[0]
+                        def clean_last(name):
                             return name.lower().replace('-', ' ').split(' ')[-1]
 
-                        email = email.replace('1', clean_name(row['First']))\
-                                    .replace('2', clean_name(row['Last']))\
-                                    .replace('3', clean_name(row['First'])[0])\
-                                    .replace('4', clean_name(row['Last'])[0])
+                        email = email.replace('1', clean_first(row['First']))\
+                                    .replace('2', clean_last(row['Last']))\
+                                    .replace('3', clean_first(row['First'])[0])\
+                                    .replace('4', clean_last(row['Last'])[0])
                         
                         email = [email + '@' + address]
                         emails.append(list(row)[:-1] + email)
