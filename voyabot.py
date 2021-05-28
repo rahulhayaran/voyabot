@@ -185,9 +185,14 @@ class LinkedInBot(VoyaBot):
             sleep(0.7)
 
             blocks = self.driver.find_elements_by_class_name('entity-result__item')
+
+            if not blocks:
+                break
+
             for block in blocks:
                 scraped_link = block.find_elements_by_class_name('app-aware-link')
                 scraped_links.append(scraped_link[0].get_attribute('href'))
+            
             sleep(0.7)
         return scraped_links
 
@@ -225,7 +230,7 @@ class RocketBot(VoyaBot):
             df = self.do_search(firm)
             if df is not None and df.iloc[0][0] != '-':
                 firms_df[firm] = self.clean_df(df)
-
+                
         for i, row in self.inputs_df.iterrows():
             if row['Found Email?'] != 'Yup :)':
                 firm = clean_firm(row['Firm'])
@@ -292,9 +297,9 @@ class RocketBot(VoyaBot):
             return pd.DataFrame(data=data, columns=['_', 'template', 'frequency'])
 
     def clean_df(self, df: pd.DataFrame) -> pd.DataFrame:
+
         df['frequency'] = df['frequency'].apply(lambda x: float(x.replace('%', '').replace('-', '0') if type(x) == str else x))
         df = df[df['frequency'] >= ROCKET_GENERAL_TEMPLATE_FREQ_THRESHOLD]
-        
         first = list(df[df['_'] == 'first']['frequency'])
         if first and len(first) > 0 and first[0] < ROCKET_FIRST_AT_TEMPLATE_FREQ_THRESHOLD:
             df = df[df['_'] != 'first']

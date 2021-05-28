@@ -1,0 +1,13 @@
+tesla
++--------------------+--------------------------+-------------+
+| format             | example                  | frequency   |
+|--------------------+--------------------------+-------------|
+| first_initial last | jdoe@teslamotors.com     | 20.0%       |
+| first last         | janedoe@teslamotors.com  | 18.3%       |
+| first last_initial | janed@teslamotors.com    | 17.8%       |
+| last               | doe@teslamotors.com      | 17.8%       |
+| first              | jane@teslamotors.com     | 13.9%       |
+| last first_initial | doej@teslamotors.com     | 10.0%       |
+| first '.' last     | jane.doe@teslamotors.com | 1.7%        |
+| first '_' last     | jane_doe@teslamotors.com | 0.6%        |
++--------------------+--------------------------+-------------+
