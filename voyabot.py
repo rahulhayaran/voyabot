@@ -64,6 +64,8 @@ class LinkedInBot(VoyaBot):
 
     def scrape_data(self) -> pd.DataFrame:
 
+        #self.process_company('Facebook')
+        
         queries = self.inputs.get_queries()
         arr = []
 
@@ -71,14 +73,14 @@ class LinkedInBot(VoyaBot):
             query_url = self.process_query()
             for search in query.split(', '):
                 self.driver.get(query_url)
-                sleep(0.5)
+                sleep(2)
                 links = self.do_search(self.process_search(search))
                 for link in links:
 
                     try:
                         self.driver.get(link)
-                        self.driver.execute_script("document.body.style.zoom='10%'")
-                        sleep(0.8)
+                        self.driver.execute_script("document.body.style.zoom='30%'")
+                        sleep(2)
 
                         if 'headless' in link or 'search' in link:
                             continue
@@ -167,6 +169,26 @@ class LinkedInBot(VoyaBot):
         
         _ = input('\n---\nDone using LinkedIn filters? Press enter to continue')
         return self.driver.current_url
+
+    def process_company(self, company: str) -> str:
+        self.driver.get("https://www.linkedin.com/search/results/people/")
+
+        sleep(0.8)
+        search = self.driver.find_element_by_xpath('//*[@class="search-global-typeahead__input always-show-placeholder"]')
+        
+        search.send_keys(Keys.COMMAND + Keys.CONTROL + "a")
+        sleep(0.8)
+
+        search.send_keys(Keys.DELETE)
+        sleep(0.8)
+
+        search.send_keys(company + '\n')
+        sleep(1.5)
+
+        button = self.driver.find_element_by_xpath('//*[@type="button"][4]')
+        button.click()
+
+        sleep(1.0)
 
     def process_search(self, role: str) -> str:
         sleep(0.8)
@@ -295,7 +317,7 @@ class RocketBot(VoyaBot):
         for url in urls:
             url = urls[0] if 'https://' in urls[0] else 'https://' + urls[0]
             self.driver.get(url)
-            sleep(5)
+            sleep(10)
             break
 
         table = self.driver.find_elements_by_xpath("//*[@class='table']")
