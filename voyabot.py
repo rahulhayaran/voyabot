@@ -145,7 +145,14 @@ class LinkedInBot(VoyaBot):
             role = safe_html_read(block.find_elements_by_xpath('//*[@class="t-14 t-black t-bold"]'))[0]
             firm = safe_html_read(block.find_elements_by_xpath('//*[@class="t-16 t-black t-bold"]'))[0]
         
-        return role.replace('Title', ''), firm.replace('Company Name', '')\
+        return role.replace('Title', '').replace('Sr.', 'Senior')\
+                                        .replace('Of', 'of')\
+                                        .replace('&', 'and')\
+                                        .replace('Director,', 'Director of')\
+                                        .replace('Manager,', 'Manager of')\
+                                        .replace('President,', 'President of')\
+                                        .replace('VP,', 'VP of')\
+                                        .strip(), firm.replace('Company Name', '')\
                                               .replace('Full-time', '')\
                                               .replace('Part-time', '')\
                                               .replace('Self-employed', '')\
@@ -258,40 +265,42 @@ class RocketBot(VoyaBot):
         firms_df = dict()
 
         for i, row in self.inputs_df.iterrows():
+            try:
+                if row['Found Email?'] != 'Yup :)':
+                    firm = clean_firm(row['Firm'])
 
-            if row['Found Email?'] != 'Yup :)':
-                firm = clean_firm(row['Firm'])
+                    # find firm if new
+                    if firm not in firms_df:
+                        df = self.do_search(firm)
+                        if df is not None and df.iloc[0][0] != '-':
+                            firms_df[firm] = self.clean_df(df)
+                        else:
+                            firms_df[firm] = None
+                    
+                    # else check valid
+                    elif firms_df[firm] is not None:
+                        df = firms_df[firm]
+                        for template in df['template']:
+                            email, address = template.split('@')
+                            email = email.replace('jane', '1').replace('doe', '2').replace('j', '3').replace('d', '4')
 
-                # find firm if new
-                if firm not in firms_df:
-                    df = self.do_search(firm)
-                    if df is not None and df.iloc[0][0] != '-':
-                        firms_df[firm] = self.clean_df(df)
+                            def clean_first(name):
+                                return name.lower().replace('-', ' ').split(' ')[0]
+                            def clean_last(name):
+                                return name.lower().replace('-', ' ').split(' ')[-1]
+
+                            email = email.replace('1', clean_first(row['First']))\
+                                        .replace('2', clean_last(row['Last']))\
+                                        .replace('3', clean_first(row['First'])[0])\
+                                        .replace('4', clean_last(row['Last'])[0])
+                            
+                            email = [email + '@' + address]
+                            emails.append(list(row)[:-1] + email)
+                        self.inputs_df.at[i, 'Found Email?'] = 'Yup :)'
                     else:
-                        firms_df[firm] = None
-                
-                # else check valid
-                elif firms_df[firm] is not None:
-                    df = firms_df[firm]
-                    for template in df['template']:
-                        email, address = template.split('@')
-                        email = email.replace('jane', '1').replace('doe', '2').replace('j', '3').replace('d', '4')
-
-                        def clean_first(name):
-                            return name.lower().replace('-', ' ').split(' ')[0]
-                        def clean_last(name):
-                            return name.lower().replace('-', ' ').split(' ')[-1]
-
-                        email = email.replace('1', clean_first(row['First']))\
-                                    .replace('2', clean_last(row['Last']))\
-                                    .replace('3', clean_first(row['First'])[0])\
-                                    .replace('4', clean_last(row['Last'])[0])
-                        
-                        email = [email + '@' + address]
-                        emails.append(list(row)[:-1] + email)
-                    self.inputs_df.at[i, 'Found Email?'] = 'Yup :)'
-                else:
-                    self.inputs_df.at[i, 'Found Email?'] = 'Tried and Failed :('
+                        self.inputs_df.at[i, 'Found Email?'] = 'Tried and Failed :('
+            except:
+                print("Broke!")
 
         self.inputs.clear()
         self.inputs.write(self.inputs_df)
