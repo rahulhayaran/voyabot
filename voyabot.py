@@ -146,7 +146,7 @@ class LinkedInBot(VoyaBot):
             firm = safe_html_read(block.find_elements_by_xpath('//*[@class="t-16 t-black t-bold"]'))[0]
         
         return role.replace('Title', '').replace('Sr.', 'Senior')\
-                                        .replace('Of', 'of')\
+                                        .replace('Of ', 'of ')\
                                         .replace('&', 'and')\
                                         .replace('Director,', 'Director of')\
                                         .replace('Manager,', 'Manager of')\
