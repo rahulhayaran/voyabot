@@ -3,14 +3,12 @@ from sheet import *
 
 import pandas as pd
 import unidecode
-import requests
 from time import sleep
 from selenium.common.exceptions import NoSuchElementException
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
-from bs4 import BeautifulSoup
 
 class VoyaBot:
     def __init__():
@@ -202,18 +200,6 @@ class LinkedInBot(VoyaBot):
 
         sleep(1.0)
 
-    def get_id(self, company_url: str) -> str:
-        
-        self.driver.get(company_url)
-
-        sleep(0.8)
-
-        self.driver.execute_script("document.body.style.zoom='30%'")
-
-        sleep(1)
-        soup = BeautifulSoup(self.driver.page_source, 'html.parser')
-
-
     def process_search(self, role: str) -> str:
         sleep(0.8)
         search = self.driver.find_element_by_xpath('//*[@class="search-global-typeahead__input always-show-placeholder"]')
@@ -250,123 +236,6 @@ class LinkedInBot(VoyaBot):
             
             sleep(0.7)
         return scraped_links
-
-class ClearBot(VoyaBot):
-    
-    # Core API
-
-    def __init__(self, inputs: Sheet):
-        self.inputs = inputs
-
-        self.load_driver()
-
-    def scrape_data(self) -> pd.DataFrame:
-        
-        _ = input('\n---\nReady to use Clearbit? Press enter to continue')
-        
-        queries = self.inputs.get_queries()
-        arr = []
-
-        for query in queries:
-            query_url = self.process_query()
-            for search in query.split(', '):
-                self.driver.get(query_url)
-                sleep(2)
-                links = self.do_search(self.process_search(search))
-                for link in links:
-
-                    try:
-                        self.driver.get(link)
-                        self.driver.execute_script("document.body.style.zoom='30%'")
-                        sleep(2)
-
-                        if 'headless' in link or 'search' in link:
-                            continue
-
-                        first, last = self.scrape_name()
-                        role, firm = self.scrape_xp()
-                        schools = self.scrape_schools()
-                        skills = self.scrape_skills()
-
-                        arr.append([first, last, role, firm, ' | '.join(schools), ' | '.join(skills), link])
-                    
-                    except NoSuchElementException:
-                        
-                        print("Profile incomplete")
-
-
-        return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools', 'Skills', 'Link'])
-
-    # Scrapers
-
-    def scrape_name(self) -> tuple:
-        def split_name(phrases):
-            valid_phrases = []
-            for phrase in phrases:
-                if len(phrase) > 0\
-                    and phrase.replace("'", ' ').replace('-', ' ').isalpha()\
-                    and 'Mr' not in phrase\
-                    and 'Mrs' not in phrase\
-                    and 'Ms' not in phrase\
-                    and 'Dr' not in phrase\
-                    and 'MBA' not in phrase\
-                    and 'CPA' not in phrase\
-                    and 'CFA' not in phrase\
-                    and 'PMP' not in phrase\
-                    and 'SCPM' not in phrase\
-                    and 'PhD' not in phrase\
-                    and 'SPHR' not in phrase\
-                    and 'PHR' not in phrase\
-                    and 'CPSP-1' not in phrase\
-                    and 'MD' not in phrase\
-                    and 'JD' not in phrase\
-                    and 'He/' not in phrase\
-                    and 'She/' not in phrase\
-                    and 'They/' not in phrase\
-                    and 'Ze/' not in phrase:
-                    valid_phrases.append(phrase)
-            return valid_phrases if len(valid_phrases) > 0 else ['-']
-
-        name = safe_html_read(self.driver.find_elements_by_xpath('//*[@class="text-heading-xlarge inline t-24 v-align-middle break-words"]'))[0]
-        valid_phrases = split_name(name.replace('(', ' ').replace(')', ' ').replace(',', ' ').replace('.', '').split(' '))
-        first = unidecode.unidecode(valid_phrases[0].title())
-        last = unidecode.unidecode(valid_phrases[-1].title())
-
-        return first, last
-
-    def scrape_xp(self) -> tuple:    
-        block = self.driver.find_element_by_xpath('//*[@class="pv-profile-section__card-item-v2 pv-profile-section pv-position-entity ember-view"]')
-        role = safe_html_read(block.find_elements_by_xpath('//*[@class="t-16 t-black t-bold"]'))[0]
-        firm = safe_html_read(block.find_elements_by_xpath('//*[@class="pv-entity__secondary-title t-14 t-black t-normal"]'))[0]
-
-        if 'Company Name' in role:
-            role = safe_html_read(block.find_elements_by_xpath('//*[@class="t-14 t-black t-bold"]'))[0]
-            firm = safe_html_read(block.find_elements_by_xpath('//*[@class="t-16 t-black t-bold"]'))[0]
-        
-        return role.replace('Title', '').replace('Sr. ', 'Senior ')\
-                                        .replace('Sr ', 'Senior ')\
-                                        .replace('Of ', 'of ')\
-                                        .replace('&', 'and')\
-                                        .replace('Director,', 'Director of')\
-                                        .replace('Manager,', 'Manager of')\
-                                        .replace('President,', 'President of')\
-                                        .replace('VP,', 'VP of')\
-                                        .replace('Head,', 'Head of')\
-                                        .replace('Leader,', 'Leader of')\
-                                        .replace('Lead,', 'Leader of')\
-                                        .strip(), firm.replace('Company Name', '')\
-                                              .replace('Full-time', '')\
-                                              .replace('Part-time', '')\
-                                              .replace('Self-employed', '')\
-                                              .replace('Freelance', '')\
-                                              .replace('Contract', '')\
-                                              .replace('Internship', '')\
-                                              .replace('Apprenticeship', '')\
-                                              .replace('Seasonal', '')
-
-
-    # Utilities
-
 
 
 class RocketBot(VoyaBot):
