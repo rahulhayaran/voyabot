@@ -162,7 +162,8 @@ class LinkedInBot(VoyaBot):
                                               .replace('Contract', '')\
                                               .replace('Internship', '')\
                                               .replace('Apprenticeship', '')\
-                                              .replace('Seasonal', '')
+                                              .replace('Seasonal', '')\
+                                              .strip()    
 
     def scrape_schools(self) -> list:
         return safe_html_read(self.driver.find_elements_by_xpath('//*[@class="pv-entity__school-name t-16 t-black t-bold"]'))
