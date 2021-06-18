@@ -51,7 +51,7 @@ git pull
 
 ### If you want to search LinkedIn:
 
-2. Fill in `queries.xlsx` with the `Firm`s and `Roles` you are interested in. For each row, enter the LinkedIn ID of the `Firm`. To find a `Firm`'s LinkedIn ID, search for People with the "Current Company" set to your company. Look for the ID in the URL (it should be a 4 or 5 digit number):
+2. Fill in `queries.xlsx` with the `Firm`s and `Roles` you are interested in. For each row, enter the LinkedIn ID of the `Firm`. To find a `Firm`'s LinkedIn ID, search for People with the "Current Company" set to your company. Look for the ID in the URL (it should be a 4 to 8 digit number):
 
    linkedin.com/search/results/people/?currentCompany=%5B%***FIRM_ID***%5D&keywords=facebook&origin=FACETED_SEARCH
 
