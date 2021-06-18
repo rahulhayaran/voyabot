@@ -68,16 +68,16 @@ class LinkedInBot(VoyaBot):
 
         queries = self.inputs.get_queries()
         arr = []
-
-        input("Hit ENTER to begin scraping")
-
+        
         for firm, roles in queries:
             query_url = "https://www.linkedin.com/search/results/people/?currentCompany=%5B\"" + str(firm) + "\"%5D"
-            
             for search in roles.split(', '):
-                self.driver.get(query_url)
                 bot_sleep(1)
-                links = self.do_search(self.process_search(search))
+                self.driver.get(query_url)
+                pages = LINKEDIN_PAGES
+                if " - " in search:
+                    search, pages = search.split(" - ")
+                links = self.do_search(self.process_search(search), int(pages))
                 for link in links:
 
                     try:
@@ -102,6 +102,9 @@ class LinkedInBot(VoyaBot):
                         if input("Input any text to save profiles. To exit, hit ENTER."):
                             return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools', 'Skills', 'Link'])
                         exit()
+
+                    except:
+                        return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools', 'Skills', 'Link'])
                         
         return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools', 'Skills', 'Link'])
 
@@ -198,7 +201,7 @@ class LinkedInBot(VoyaBot):
         self.driver.execute_script("document.body.style.zoom='30%'")
         return self.driver.current_url
 
-    def do_search(self, reset_url: str) -> list:
+    def do_search(self, reset_url: str, pages: int) -> list:
         scraped_links = []
         for i in range(1, LINKEDIN_PAGES + 1):
             if i != 1:
