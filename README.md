@@ -1,6 +1,6 @@
 # Voyabot
 
-This is the Voyager LinkedIn Bot (fondly referred to as Voyabot). It automates LinkedIn profile searches. To use it, you need to do a few things. Message Rahul if you have trouble with any of this.
+This is the Voyager LinkedIn Bot (fondly referred to as Voyabot). It automates LinkedIn profile searches. To use it, you need to do a few things. Message Rahul or Peter if you have trouble with any of this.
 
 ## Setup
 
@@ -22,15 +22,17 @@ pip install -r requirements.txt
 4. Create a file called `parameters.py` and fill it up with the appropriate information. An example is provided below
 ```python
 # LinkedInBot
-LINKEDIN_USERNAME = # type your LinkedIn username here in single quotes
-LINKEDIN_PASSWORD = # type your LinkedIn password here in single quotes
-LINKEDIN_PAGES = 5
-LINKEDIN_ROLES_TO_REMOVE = ['Intern', 'Contractor']  # these are roles you want removed from your searches
+LINKEDIN_USERNAME = 'petez@berkeley.edu' # type your LinkedIn username here in single quotes
+LINKEDIN_PASSWORD = 'QpWoEi102938!' # type your LinkedIn password here in single quotes
+LINKEDIN_PAGES = 1
+LINKEDIN_ROLES_TO_REMOVE = ['Intern', 'Contractor', 'Driver', 'Cook', 'Server', 'Associate', 'Creator']  # these are roles you want removed from your searches
 LINKEDIN_SCHOOLS_TO_FLAG = ['Berkeley', 'Haas']  # these are schools whose alumni you want tracked
+SLEEP_SPEED = 1 # the length of sleep is scaled by this factor, so 0.5 halves the wait time
+SLEEP_NOISE = 0.25 # adds uniform noise from 0 to this cutoff to each sleep, set to 0 to disable
 
 # RocketBot
-ROCKET_GENERAL_TEMPLATE_FREQ_THRESHOLD = 0.0  # this is the minimum frequency an email template must have on RocketReach to be included
-ROCKET_FIRST_AT_TEMPLATE_FREQ_THRESHOLD = 0.0  # this is the minimum frequency the 'first@firm.com' email template must have on RocketReach to be included
+ROCKET_GENERAL_TEMPLATE_FREQ_THRESHOLD = 25 # this is the minimum frequency (0-100) an email template must have on RocketReach to be included
+ROCKET_FIRST_AT_TEMPLATE_FREQ_THRESHOLD = 50  # this is the minimum frequency (0-100) the 'first@firm.com' email template must have on RocketReach to be included
 ```
 
 5. Run `setup.py`. This will create a `queries.xlsx` Excel file from which you can begin entering searches.
@@ -49,13 +51,17 @@ git pull
 
 ### If you want to search LinkedIn:
 
-2. Fill in `queries.xlsx` with the `Role`s you are interested in. Every row corresponds to a new `Firm`. Within a single row, enter a spaced-comma list of the `Role`s you want for that specific `Firm`. For instance, if I was trying to search for Machine Learning Engineers and Software Engineers at Firm A and Product Managers and Data Scientists at Firm B, I'd enter the following
+2. Fill in `queries.xlsx` with the `Firm`s and `Roles` you are interested in. For each row, enter the LinkedIn ID of the `Firm`. To find a `Firm`'s LinkedIn ID, search for People with the "Current Company" set to your company. Look for the ID in the URL (it should be a 4 or 5 digit number):
+
+   linkedin.com/search/results/people/?currentCompany=%5B%***FIRM_ID***%5D&keywords=facebook&origin=FACETED_SEARCH
+
+   In the adjacent column, add a spaced-comma list of the `Roles` you want for that specific `Firm`. For instance, if I was trying to search for Machine Learning Engineers and Software Engineers at Firm 10412 and Product Managers and Data Scientists at Firm 51232, I'd enter the following
 ```python
-----------------------------------------------
-|Machine Learning Engineer, Software Engineer|
-----------------------------------------------
-|Product Manager, Data Scientist             |
-----------------------------------------------
+-------------------------------------------------------
+| 10412 | Machine Learning Engineer, Software Engineer|
+-------------------------------------------------------
+| 51232 | Product Manager, Data Scientist             |
+-------------------------------------------------------
 ```
 
 3. Be sure to close `queries.xlsx` after you finish editing!
@@ -65,7 +71,7 @@ git pull
 python3 am_linkedin.py
 ```
 
-5. When prompted (you'll see a `Done using LinkedIn filters? Press enter to continue`), enter the newly opened LinkedIn window and enter your `Firm` filters (the bot will enter your `Role` filters as per `queries.xlsx`). Note you'll have to repeat this step for every row you have in `queries.xlsx`.
+5. When prompted (you'll see a `Hit ENTER to begin scraping`), enter the newly opened LinkedIn window and enter your `Firm` filters (the bot will enter your `Role` filters as per `queries.xlsx`). Note you'll have to repeat this step for every row you have in `queries.xlsx`.
 
 6. Sit back and relax! Your results will appear in `results.xlsx`!
 

@@ -9,6 +9,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
+from numpy import random
 
 class VoyaBot:
     def __init__():
@@ -37,6 +38,8 @@ def safe_html_read(blocks: list):
     return read if len(read) > 0 else ['-']
 
 
+def bot_sleep(time):
+    sleep(time * SLEEP_SPEED + random.uniform(0, SLEEP_NOISE))
 class LinkedInBot(VoyaBot):
     
     # Core API
@@ -66,18 +69,21 @@ class LinkedInBot(VoyaBot):
         queries = self.inputs.get_queries()
         arr = []
 
-        for query in queries:
-            query_url = self.process_query()
-            for search in query.split(', '):
+        input("Hit ENTER to begin scraping")
+
+        for firm, roles in queries:
+            query_url = "https://www.linkedin.com/search/results/people/?currentCompany=%5B\"" + str(firm) + "\"%5D"
+            
+            for search in roles.split(', '):
                 self.driver.get(query_url)
-                sleep(2)
+                bot_sleep(1)
                 links = self.do_search(self.process_search(search))
                 for link in links:
 
                     try:
                         self.driver.get(link)
                         self.driver.execute_script("document.body.style.zoom='30%'")
-                        sleep(2)
+                        bot_sleep(1)
 
                         if 'headless' in link or 'search' in link:
                             continue
@@ -90,10 +96,13 @@ class LinkedInBot(VoyaBot):
                         arr.append([first, last, role, firm, ' | '.join(schools), ' | '.join(skills), link])
                     
                     except NoSuchElementException:
+                        print("Profile incomplete, try increasing sleep scale")
+
+                    except KeyboardInterrupt:
+                        if input("Input any text to save profiles. To exit, hit ENTER."):
+                            return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools', 'Skills', 'Link'])
+                        exit()
                         
-                        print("Profile incomplete")
-
-
         return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools', 'Skills', 'Link'])
 
     # Scrapers
@@ -173,46 +182,18 @@ class LinkedInBot(VoyaBot):
 
     # Utilities
 
-    def process_query(self) -> str:
-        self.driver.execute_script("document.body.style.zoom='100%'")
-        sleep(0.5)
-        
-        _ = input('\n---\nDone using LinkedIn filters? Press enter to continue')
-        return self.driver.current_url
-
-    def process_company(self, company: str) -> str:
-
-        self.driver.get("https://www.linkedin.com/search/results/people/")
-
-        sleep(0.8)
-        search = self.driver.find_element_by_xpath('//*[@class="search-global-typeahead__input always-show-placeholder"]')
-        
-        search.send_keys(Keys.COMMAND + Keys.CONTROL + "a")
-        sleep(0.8)
-
-        search.send_keys(Keys.DELETE)
-        sleep(0.8)
-
-        search.send_keys(company + '\n')
-        sleep(1.5)
-
-        button = self.driver.find_element_by_xpath('//*[@type="button"][3]')
-        button.click()
-
-        sleep(1.0)
-
     def process_search(self, role: str) -> str:
-        sleep(0.8)
+        bot_sleep(0.25)
         search = self.driver.find_element_by_xpath('//*[@class="search-global-typeahead__input always-show-placeholder"]')
     
         search.send_keys(Keys.COMMAND + Keys.CONTROL + "a")
-        sleep(0.8)
+        bot_sleep(0.25)
 
         search.send_keys(Keys.DELETE)
-        sleep(0.8)
+        bot_sleep(0.25)
 
         search.send_keys(role + '\n')
-        sleep(1.5)
+        bot_sleep(1)
 
         self.driver.execute_script("document.body.style.zoom='30%'")
         return self.driver.current_url
@@ -224,7 +205,7 @@ class LinkedInBot(VoyaBot):
                 page = '' if i == 0 else '&page=' + str(i)
                 self.driver.get(reset_url + page)
                 self.driver.execute_script("document.body.style.zoom='30%'")
-            sleep(0.7)
+            bot_sleep(0.7)
 
             blocks = self.driver.find_elements_by_class_name('entity-result__item')
 
@@ -235,7 +216,7 @@ class LinkedInBot(VoyaBot):
                 scraped_link = block.find_elements_by_class_name('app-aware-link')
                 scraped_links.append(scraped_link[0].get_attribute('href'))
             
-            sleep(0.7)
+            bot_sleep(0.7)
         return scraped_links
 
 
@@ -327,7 +308,7 @@ class RocketBot(VoyaBot):
         for url in urls:
             url = urls[0] if 'https://' in urls[0] else 'https://' + urls[0]
             self.driver.get(url)
-            sleep(10)
+            bot_sleep(10)
             break
 
         table = self.driver.find_elements_by_xpath("//*[@class='table']")

@@ -25,4 +25,4 @@ class Queries(Sheet):
         super().__init__(filename)
 
     def get_queries(self) -> pd.Series:
-        return self.read()['Queries']
+        return zip(self.read()['Firm'], self.read()['Roles'])
