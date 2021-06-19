@@ -10,14 +10,19 @@ from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from numpy import random
+import logging
+from tqdm import tqdm
 
 class VoyaBot:
-    def __init__():
-        pass
+    def __init__(self):
+        logging.basicConfig(filename='debug.log', level=logging.ERROR)
+        logging.propagate = False
 
     def load_driver(self) -> None:
         options = webdriver.ChromeOptions()
         options.add_argument("--start-maximized")
+        options.add_argument("--log-level=3")
+        options.add_experimental_option('excludeSwitches', ['enable-logging'])
 
         self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
 
@@ -45,6 +50,7 @@ class LinkedInBot(VoyaBot):
     # Core API
 
     def __init__(self, inputs: Sheet):
+        super().__init__()
         self.inputs = inputs
 
         self.load_driver()
@@ -65,17 +71,17 @@ class LinkedInBot(VoyaBot):
         sleep(0.5)
 
     def scrape_data(self) -> pd.DataFrame:
-
         queries = self.inputs.get_queries()
         arr = []
 
-        for nfirm, firm, roles in queries:
-            print("Scraping {}, firm {} of {}".format(firm, nfirm + 1, len(list(queries))))
+        for firm_num, firm, roles in queries:
+            print("Scraping {}, firm {} of {}".format(firm, firm_num + 1, len(queries)))
             bot_sleep(5)
 
             query_url = "https://www.linkedin.com/search/results/people/?currentCompany=%5B\"" + str(firm) + "\"%5D"
-            for nrole, search in enumerate(roles.split(', ')):
-                print("Scraping {}, role {} of {}".format(search, nrole + 1, len(roles.split(", "))))
+            for role_num, search in enumerate(roles.split(', ')):
+
+                print("Scraping {}, role {} of {}".format(search, role_num + 1, len(roles.split(", "))))
                 bot_sleep(1)
                 self.driver.get(query_url)
                 pages = LINKEDIN_PAGES
@@ -84,19 +90,20 @@ class LinkedInBot(VoyaBot):
 
                 links = self.do_search(self.process_search(search), int(pages))
 
-                for link in links:
+                for link in tqdm(links):
                     try:
                         arr.append(self.scrape_profile(link))
                     except NoSuchElementException as err:
-                        print("Profile not fully loaded:", link)
+                        logging.error("Profile not fully loaded:", link)
                     except KeyboardInterrupt:
-                        if input("Input any text to save profiles. To exit, hit ENTER."):
+                        if input("Save? Press ENTER for no."):
                             return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools', 'Skills', 'Link'])
+                        self.close_driver()
                         quit()
                     except Exception as err:
-                        print("Encountered error", err)
+                        logging.error(err)
         
-                        
+        print("done")
         return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools', 'Skills', 'Link'])
 
     # Scrapers
@@ -211,7 +218,7 @@ class LinkedInBot(VoyaBot):
 
     def do_search(self, reset_url: str, pages: int) -> list:
         scraped_links = []
-        for i in range(1, LINKEDIN_PAGES + 1):
+        for i in range(1, pages + 1):
             if i != 1:
                 page = '' if i == 0 else '&page=' + str(i)
                 self.driver.get(reset_url + page)
@@ -236,6 +243,7 @@ class RocketBot(VoyaBot):
     # Core API
 
     def __init__(self, inputs: Sheet):
+        super.__init__()
         self.inputs = inputs
         self.inputs_df = self.inputs.read()
 

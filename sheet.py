@@ -26,4 +26,4 @@ class Queries(Sheet):
 
     def get_queries(self) -> pd.Series:
         sheet = self.read()
-        return zip(sheet.index, sheet['Firm'], sheet['Roles'])
+        return list(zip(sheet.index, sheet['Firm'], sheet['Roles']))
