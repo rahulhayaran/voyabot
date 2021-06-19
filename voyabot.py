@@ -90,8 +90,9 @@ class LinkedInBot(VoyaBot):
                     except NoSuchElementException as err:
                         print("Profile not fully loaded:", link)
                     except KeyboardInterrupt:
-                        if not input("Input any text to save profiles. To exit, hit ENTER."):
+                        if input("Input any text to save profiles. To exit, hit ENTER."):
                             return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools', 'Skills', 'Link'])
+                        quit()
                     except Exception as err:
                         print("Encountered error", err)
         
