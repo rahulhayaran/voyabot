@@ -8,5 +8,5 @@ SLEEP_SPEED = 2 # the length of sleep is scaled by this factor, so 0.5 halves th
 SLEEP_NOISE = 1 # adds uniform noise from 0 to this cutoff to each sleep, set to 0 to disable
 
 # RocketBot
-ROCKET_GENERAL_TEMPLATE_FREQ_THRESHOLD = 25 # this is the minimum frequency (0-100) an email template must have on RocketReach to be included
-ROCKET_FIRST_AT_TEMPLATE_FREQ_THRESHOLD = 50  # this is the minimum frequency (0-100) the 'first@firm.com' email template must have on RocketReach to be included
+ROCKET_GENERAL_TEMPLATE_FREQ_THRESHOLD = 20 # this is the minimum frequency (0-100) an email template must have on RocketReach to be included
+ROCKET_FIRST_AT_TEMPLATE_FREQ_THRESHOLD = 80  # this is the minimum frequency (0-100) the 'first@firm.com' email template must have on RocketReach to be included

@@ -68,47 +68,53 @@ class LinkedInBot(VoyaBot):
 
         queries = self.inputs.get_queries()
         arr = []
-        
-        for firm, roles in queries:
+
+        for nfirm, firm, roles in queries:
+            print("Scraping firm {} of {}".format(nfirm + 1, len(list(queries))))
+            bot_sleep(5)
+
             query_url = "https://www.linkedin.com/search/results/people/?currentCompany=%5B\"" + str(firm) + "\"%5D"
-            for search in roles.split(', '):
+            for nrole, search in enumerate(roles.split(', ')):
+                print("Scraping {}, role {} of {}".format(search, nrole + 1, len(roles.split(", "))))
                 bot_sleep(1)
                 self.driver.get(query_url)
                 pages = LINKEDIN_PAGES
                 if " - " in search:
                     search, pages = search.split(" - ")
+
                 links = self.do_search(self.process_search(search), int(pages))
+
                 for link in links:
-
                     try:
-                        self.driver.get(link)
-                        self.driver.execute_script("document.body.style.zoom='30%'")
-                        bot_sleep(1)
-
-                        if 'headless' in link or 'search' in link:
-                            continue
-
-                        first, last = self.scrape_name()
-                        role, firm = self.scrape_xp()
-                        schools = self.scrape_schools()
-                        skills = self.scrape_skills()
-
-                        arr.append([first, last, role, firm, ' | '.join(schools), ' | '.join(skills), link])
-                    
-                    except NoSuchElementException:
-                        print("Profile incomplete, try increasing sleep scale")
-
+                        arr.append(self.scrape_profile(link))
+                    except NoSuchElementException as err:
+                        print("Profile not fully loaded:", link)
                     except KeyboardInterrupt:
-                        if input("Input any text to save profiles. To exit, hit ENTER."):
+                        if not input("Input any text to save profiles. To exit, hit ENTER."):
                             return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools', 'Skills', 'Link'])
-                        exit()
-
-                    except:
-                        return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools', 'Skills', 'Link'])
+                    except Exception as err:
+                        print("Encountered error", err)
+        
                         
         return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools', 'Skills', 'Link'])
 
     # Scrapers
+
+    def scrape_profile(self, profile_url: str) -> tuple:
+        
+        self.driver.get(profile_url)
+        self.driver.execute_script("document.body.style.zoom='30%'")
+        bot_sleep(1)
+
+        if 'headless' in profile_url or 'search' in profile_url:
+            raise Exception("Profile link error:", profile_url)
+
+        first, last = self.scrape_name()
+        role, firm = self.scrape_xp()
+        schools = self.scrape_schools()
+        skills = self.scrape_skills()
+
+        return (first, last, role, firm, ' | '.join(schools), ' | '.join(skills), profile_url)
 
     def scrape_name(self) -> tuple:
         def split_name(phrases):
@@ -166,6 +172,7 @@ class LinkedInBot(VoyaBot):
                                         .replace('Head,', 'Head of')\
                                         .replace('Leader,', 'Leader of')\
                                         .replace('Lead,', 'Leader of')\
+                                        .replace(" - ", " of ")\
                                         .strip(), firm.replace('Company Name', '')\
                                               .replace('Full-time', '')\
                                               .replace('Part-time', '')\
