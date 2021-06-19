@@ -8,7 +8,7 @@ class Sheet:
             pd.DataFrame().to_excel(self.filename, index=False, engine='openpyxl')
 
     def read(self) -> pd.DataFrame:
-        return pd.read_excel(self.filename, engine='openpyxl')
+        return pd.read_excel(self.filename, engine='openpyxl', converters={'Firm':str,'Roles':str})
 
     def write(self, append_df: pd.DataFrame) -> None:
         curr_df = self.read()
@@ -26,4 +26,4 @@ class Queries(Sheet):
 
     def get_queries(self) -> pd.Series:
         sheet = self.read()
-        return zip(sheet.index, sheet['Firm'].astype(str), sheet['Roles'])
+        return zip(sheet.index, sheet['Firm'], sheet['Roles'])
