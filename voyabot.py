@@ -70,7 +70,7 @@ class LinkedInBot(VoyaBot):
         arr = []
 
         for nfirm, firm, roles in queries:
-            print("Scraping firm {} of {}".format(nfirm + 1, len(list(queries))))
+            print("Scraping {}, firm {} of {}".format(firm, nfirm + 1, len(list(queries))))
             bot_sleep(5)
 
             query_url = "https://www.linkedin.com/search/results/people/?currentCompany=%5B\"" + str(firm) + "\"%5D"
