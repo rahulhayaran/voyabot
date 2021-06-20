@@ -76,7 +76,7 @@ class LinkedInBot(VoyaBot):
 
         for firm_num, firm, roles in queries:
             print("Scraping {}, firm {} of {}".format(firm, firm_num + 1, len(queries)))
-            bot_sleep(5)
+            bot_sleep(10)
 
             query_url = "https://www.linkedin.com/search/results/people/?currentCompany=%5B\"" + str(firm) + "\"%5D"
             for role_num, search in enumerate(roles.split(', ')):
@@ -87,8 +87,10 @@ class LinkedInBot(VoyaBot):
                 pages = LINKEDIN_PAGES
                 if " - " in search:
                     search, pages = search.split(" - ")
-
-                links = self.do_search(self.process_search(search), int(pages))
+                try:
+                    links = self.do_search(self.process_search(search), int(pages))
+                except Exception as err:
+                    logging.error(err)
 
                 for link in tqdm(links):
                     try:
