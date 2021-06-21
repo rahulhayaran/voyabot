@@ -245,7 +245,7 @@ class RocketBot(VoyaBot):
     # Core API
 
     def __init__(self, inputs: Sheet):
-        super.__init__()
+        super().__init__()
         self.inputs = inputs
         self.inputs_df = self.inputs.read()
 
