@@ -78,7 +78,7 @@ class LinkedInBot(VoyaBot):
             print("Scraping {}, firm {} of {}".format(firm, firm_num + 1, len(queries)))
             bot_sleep(10)
 
-            query_url = "https://www.linkedin.com/search/results/people/?currentCompany=%5B\"" + str(firm) + "\"%5D"
+            query_url = "https://www.linkedin.com/search/results/people/?currentCompany=%5B\"" + str(firm) + "\"%5D&geoUrn=%5B\"103644278\"%5D"
             for role_num, search in enumerate(roles.split(', ')):
 
                 print("Scraping {}, role {} of {}".format(search, role_num + 1, len(roles.split(", "))))
