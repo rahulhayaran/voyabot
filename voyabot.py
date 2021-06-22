@@ -98,9 +98,9 @@ class LinkedInBot(VoyaBot):
                     except NoSuchElementException as err:
                         logging.error("Profile not fully loaded:", link)
                     except KeyboardInterrupt:
+                        self.close_driver()
                         if input("Save? Press ENTER for no."):
                             return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools', 'Skills', 'Link'])
-                        self.close_driver()
                         quit()
                     except Exception as err:
                         logging.error(err)
@@ -172,6 +172,7 @@ class LinkedInBot(VoyaBot):
         
         return role.replace('Title', '').replace('Sr. ', 'Senior ')\
                                         .replace('Sr ', 'Senior ')\
+                                        .replace('Snr ', 'Senior ')\
                                         .replace('Of ', 'of ')\
                                         .replace('& ', 'and ')\
                                         .replace('Director,', 'Director of')\
@@ -284,23 +285,26 @@ class RocketBot(VoyaBot):
                 
                 # else check valid
                 elif firms_df[firm] is not None:
-                    df = firms_df[firm]
-                    for template in df['template']:
-                        email, address = template.split('@')
-                        email = email.replace('jane', '1').replace('doe', '2').replace('j', '3').replace('d', '4')
+                    try:
+                        df = firms_df[firm]
+                        for template in df['template']:
+                            email, address = template.split('@')
+                            email = email.replace('jane', '1').replace('doe', '2').replace('j', '3').replace('d', '4')
 
-                        def clean_first(name):
-                            return name.lower().replace('-', ' ').split(' ')[0]
-                        def clean_last(name):
-                            return name.lower().replace('-', ' ').split(' ')[-1]
+                            def clean_first(name):
+                                return name.lower().replace('-', ' ').split(' ')[0]
+                            def clean_last(name):
+                                return name.lower().replace('-', ' ').split(' ')[-1]
 
-                        email = email.replace('1', clean_first(row['First']))\
-                                    .replace('2', clean_last(row['Last']))\
-                                    .replace('3', clean_first(row['First'])[0])\
-                                    .replace('4', clean_last(row['Last'])[0])
-                        
-                        email = [email + '@' + address]
-                        emails.append(list(row)[:-1] + email)
+                            email = email.replace('1', clean_first(row['First']))\
+                                        .replace('2', clean_last(row['Last']))\
+                                        .replace('3', clean_first(row['First'])[0])\
+                                        .replace('4', clean_last(row['Last'])[0])
+                            
+                            email = [email + '@' + address]
+                            emails.append(list(row)[:-1] + email)
+                    except:
+                        self.inputs_df.at[i, 'Found Email?'] = 'Tried and Failed :('
                     self.inputs_df.at[i, 'Found Email?'] = 'Yup :)'
                 else:
                     self.inputs_df.at[i, 'Found Email?'] = 'Tried and Failed :('
