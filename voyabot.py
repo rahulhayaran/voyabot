@@ -91,11 +91,11 @@ class LinkedInBot(VoyaBot):
                     links = self.do_search(self.process_search(search), int(pages))
                 except Exception as err:
                     logging.error(err)
-
-                for link in links:
+                for link in tqdm(links):
                     try:
-                        profile = self.scrape_profile(link, firm_name)
-                        arr.append(profile)
+                        profile = self.scrape_profile(link)
+                        if firm_name in profile[3]:
+                            arr.append(profile)
                     except NoSuchElementException as err:
                         logging.error("Profile not fully loaded:", link)
                     except KeyboardInterrupt:
@@ -109,7 +109,7 @@ class LinkedInBot(VoyaBot):
 
     # Scrapers
 
-    def scrape_profile(self, profile_url: str, firm_name: str) -> tuple:
+    def scrape_profile(self, profile_url: str) -> tuple:
         
         self.driver.get(profile_url)
         self.driver.execute_script("document.body.style.zoom='30%'")
@@ -119,7 +119,7 @@ class LinkedInBot(VoyaBot):
             raise Exception("Profile link error:", profile_url)
 
         first, last = self.scrape_name()
-        role, firm = self.scrape_xp(firm_name)
+        role, firm = self.scrape_xp()
         schools = self.scrape_schools()
         skills = self.scrape_skills()
 
@@ -160,16 +160,14 @@ class LinkedInBot(VoyaBot):
 
         return first, last
 
-    def scrape_xp(self, firm_name: str ) -> tuple:    
+    def scrape_xp(self) -> tuple:    
         block = self.driver.find_element_by_xpath('//*[@class="pv-profile-section__card-item-v2 pv-profile-section pv-position-entity ember-view"]')
-        role, firm = "",""
+        role = safe_html_read(block.find_elements_by_xpath('//*[@class="t-16 t-black t-bold"]'))[0]
+        firm = safe_html_read(block.find_elements_by_xpath('//*[@class="pv-entity__secondary-title t-14 t-black t-normal"]'))[0]
+
         if 'Company Name' in role:
-            roles = safe_html_read(block.find_elements_by_xpath('//*[@class="t-14 t-black t-bold"]'))[0]
-            firms = safe_html_read(block.find_elements_by_xpath('//*[@class="t-16 t-black t-bold"]'))[0]
-            for i in range(min(len(roles), len(firms))):
-                if firm_name in firms[i]:
-                    role, firm = roles[i], firms[i]
-                    break
+            role = safe_html_read(block.find_elements_by_xpath('//*[@class="t-14 t-black t-bold"]'))[0]
+            firm = safe_html_read(block.find_elements_by_xpath('//*[@class="t-16 t-black t-bold"]'))[0]
 
         return role.replace('Title', '').replace('Sr. ', 'Senior ')\
                                         .replace('Sr ', 'Senior ')\
