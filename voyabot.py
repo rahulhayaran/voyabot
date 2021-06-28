@@ -75,8 +75,8 @@ class LinkedInBot(VoyaBot):
         arr = []
 
         for firm_num, firm_name, firm_id, roles in queries:
-            print("Scraping {}, firm {} of {}".format(firm_name, firm_id + 1, len(queries)))
-            bot_sleep(10)
+            print("Scraping {}, firm {} of {}".format(firm_name, firm_num + 1, len(queries)))
+            bot_sleep(3)
 
             query_url = "https://www.linkedin.com/search/results/people/?currentCompany=%5B\"" + str(firm_id) + "\"%5D&geoUrn=%5B\"103644278\"%5D"
             for role_num, search in enumerate(roles.split(', ')):
@@ -92,11 +92,10 @@ class LinkedInBot(VoyaBot):
                 except Exception as err:
                     logging.error(err)
 
-                for link in tqdm(links):
+                for link in links:
                     try:
                         profile = self.scrape_profile(link, firm_name)
-                        if firm_name in profile[3]:
-                            arr.append(profile)
+                        arr.append(profile)
                     except NoSuchElementException as err:
                         logging.error("Profile not fully loaded:", link)
                     except KeyboardInterrupt:
@@ -106,7 +105,6 @@ class LinkedInBot(VoyaBot):
                         quit()
                     except Exception as err:
                         logging.error(err)
-        
         return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools', 'Skills', 'Link'])
 
     # Scrapers
@@ -121,7 +119,7 @@ class LinkedInBot(VoyaBot):
             raise Exception("Profile link error:", profile_url)
 
         first, last = self.scrape_name()
-        role, firm = self.scrape_xp()
+        role, firm = self.scrape_xp(firm_name)
         schools = self.scrape_schools()
         skills = self.scrape_skills()
 
@@ -231,7 +229,7 @@ class LinkedInBot(VoyaBot):
                 page = '' if i == 0 else '&page=' + str(i)
                 self.driver.get(reset_url + page)
                 self.driver.execute_script("document.body.style.zoom='30%'")
-            bot_sleep(0.7)
+            bot_sleep(0.5)
 
             blocks = self.driver.find_elements_by_class_name('entity-result__item')
 
@@ -242,7 +240,7 @@ class LinkedInBot(VoyaBot):
                 scraped_link = block.find_elements_by_class_name('app-aware-link')
                 scraped_links.append(scraped_link[0].get_attribute('href'))
             
-            bot_sleep(0.7)
+            bot_sleep(0.5)
         return scraped_links
 
 

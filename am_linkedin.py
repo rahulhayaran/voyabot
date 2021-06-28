@@ -19,6 +19,8 @@ def f(x):
 
 df = df[df['Role'].apply(f)]
 
+print(df)
+
 if len(LINKEDIN_SCHOOLS_TO_FLAG) > 0:
     for school in LINKEDIN_SCHOOLS_TO_FLAG:
         df[school + ' Alumni?'] = df['Schools'].apply(lambda x: school.lower() in x.lower())
