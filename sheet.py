@@ -12,7 +12,7 @@ class Sheet:
 
     def write(self, append_df: pd.DataFrame) -> None:
         curr_df = self.read()
-        curr_df = pd.concat([curr_df, append_df])
+        curr_df = pd.concat([curr_df, append_df], join = "outer")
         curr_df.drop_duplicates().to_excel(self.filename, index=False, engine='openpyxl')
 
     def clear(self) -> None:
@@ -26,4 +26,4 @@ class Queries(Sheet):
 
     def get_queries(self) -> pd.Series:
         sheet = self.read()
-        return list(zip(sheet.index, sheet['Firm'], sheet['Roles']))
+        return list(zip(sheet.index, sheet['Name'], sheet['ID'], sheet['Roles']))

@@ -24,7 +24,7 @@ if len(LINKEDIN_SCHOOLS_TO_FLAG) > 0:
         df[school + ' Alumni?'] = df['Schools'].apply(lambda x: school.lower() in x.lower())
     df.drop(columns=['Schools'], inplace=True)
 
-df['Found Email?'] = "Haven't Tried :/"
+df['Found Email?'] = "o"
 outputs.write(df)
 
 bot.close_driver()

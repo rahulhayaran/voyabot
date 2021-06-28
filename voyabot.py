@@ -74,11 +74,11 @@ class LinkedInBot(VoyaBot):
         queries = self.inputs.get_queries()
         arr = []
 
-        for firm_num, firm, roles in queries:
-            print("Scraping {}, firm {} of {}".format(firm, firm_num + 1, len(queries)))
+        for firm_num, firm_name, firm_id, roles in queries:
+            print("Scraping {}, firm {} of {}".format(firm_name, firm_id + 1, len(queries)))
             bot_sleep(10)
 
-            query_url = "https://www.linkedin.com/search/results/people/?currentCompany=%5B\"" + str(firm) + "\"%5D&geoUrn=%5B\"103644278\"%5D"
+            query_url = "https://www.linkedin.com/search/results/people/?currentCompany=%5B\"" + str(firm_id) + "\"%5D&geoUrn=%5B\"103644278\"%5D"
             for role_num, search in enumerate(roles.split(', ')):
 
                 print("Scraping {}, role {} of {}".format(search, role_num + 1, len(roles.split(", "))))
@@ -94,7 +94,9 @@ class LinkedInBot(VoyaBot):
 
                 for link in tqdm(links):
                     try:
-                        arr.append(self.scrape_profile(link))
+                        profile = self.scrape_profile(link, firm_name)
+                        if firm_name in profile[3]:
+                            arr.append(profile)
                     except NoSuchElementException as err:
                         logging.error("Profile not fully loaded:", link)
                     except KeyboardInterrupt:
@@ -105,12 +107,11 @@ class LinkedInBot(VoyaBot):
                     except Exception as err:
                         logging.error(err)
         
-        print("done")
         return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools', 'Skills', 'Link'])
 
     # Scrapers
 
-    def scrape_profile(self, profile_url: str) -> tuple:
+    def scrape_profile(self, profile_url: str, firm_name: str) -> tuple:
         
         self.driver.get(profile_url)
         self.driver.execute_script("document.body.style.zoom='30%'")
@@ -161,17 +162,20 @@ class LinkedInBot(VoyaBot):
 
         return first, last
 
-    def scrape_xp(self) -> tuple:    
+    def scrape_xp(self, firm_name: str ) -> tuple:    
         block = self.driver.find_element_by_xpath('//*[@class="pv-profile-section__card-item-v2 pv-profile-section pv-position-entity ember-view"]')
-        role = safe_html_read(block.find_elements_by_xpath('//*[@class="t-16 t-black t-bold"]'))[0]
-        firm = safe_html_read(block.find_elements_by_xpath('//*[@class="pv-entity__secondary-title t-14 t-black t-normal"]'))[0]
-
+        role, firm = "",""
         if 'Company Name' in role:
-            role = safe_html_read(block.find_elements_by_xpath('//*[@class="t-14 t-black t-bold"]'))[0]
-            firm = safe_html_read(block.find_elements_by_xpath('//*[@class="t-16 t-black t-bold"]'))[0]
-        
+            roles = safe_html_read(block.find_elements_by_xpath('//*[@class="t-14 t-black t-bold"]'))[0]
+            firms = safe_html_read(block.find_elements_by_xpath('//*[@class="t-16 t-black t-bold"]'))[0]
+            for i in range(min(len(roles), len(firms))):
+                if firm_name in firms[i]:
+                    role, firm = roles[i], firms[i]
+                    break
+
         return role.replace('Title', '').replace('Sr. ', 'Senior ')\
                                         .replace('Sr ', 'Senior ')\
+                                        .replace('Snr. ', 'Senior ')\
                                         .replace('Snr ', 'Senior ')\
                                         .replace('Of ', 'of ')\
                                         .replace('& ', 'and ')\
@@ -193,6 +197,7 @@ class LinkedInBot(VoyaBot):
                                               .replace('Internship', '')\
                                               .replace('Apprenticeship', '')\
                                               .replace('Seasonal', '')\
+                                              .replace('Permanent', '')\
                                               .strip()    
 
     def scrape_schools(self) -> list:
@@ -272,7 +277,7 @@ class RocketBot(VoyaBot):
         firms_df = dict()
 
         for i, row in self.inputs_df.iterrows():
-            if row['Found Email?'] != 'Yup :)':
+            if row['Found Email?'] != 'x':
                 firm = clean_firm(row['Firm'])
 
                 # find firm if new
@@ -282,9 +287,9 @@ class RocketBot(VoyaBot):
                         firms_df[firm] = self.clean_df(df)
                     else:
                         firms_df[firm] = None
-                
+
                 # else check valid
-                elif firms_df[firm] is not None:
+                if firms_df[firm] is not None:
                     try:
                         df = firms_df[firm]
                         for template in df['template']:
@@ -301,18 +306,18 @@ class RocketBot(VoyaBot):
                                         .replace('3', clean_first(row['First'])[0])\
                                         .replace('4', clean_last(row['Last'])[0])
                             
-                            email = [email + '@' + address]
-                            emails.append(list(row)[:-1] + email)
+                            email = email + '@' + address
+                            emails.append([row['First'], row['Last'], row['Role'], row['Firm'], row['Berkeley Alumni?'], row['Haas Alumni?'], email])
                     except:
-                        self.inputs_df.at[i, 'Found Email?'] = 'Tried and Failed :('
-                    self.inputs_df.at[i, 'Found Email?'] = 'Yup :)'
+                        self.inputs_df.at[i, 'Found Email?'] = '-'
+                    self.inputs_df.at[i, 'Found Email?'] = 'x'
                 else:
-                    self.inputs_df.at[i, 'Found Email?'] = 'Tried and Failed :('
+                    self.inputs_df.at[i, 'Found Email?'] = '-'
 
         self.inputs.clear()
         self.inputs.write(self.inputs_df)
 
-        return pd.DataFrame(emails, columns=self.inputs_df.columns)
+        return pd.DataFrame(emails, columns=['First', 'Last','Role', 'Firm', 'Berkeley Alumni?', 'Haas Alumni?', 'Email'])
 
     # Utilities
 
@@ -333,7 +338,7 @@ class RocketBot(VoyaBot):
         for url in urls:
             url = urls[0] if 'https://' in urls[0] else 'https://' + urls[0]
             self.driver.get(url)
-            bot_sleep(10)
+            sleep(3)
             break
 
         table = self.driver.find_elements_by_xpath("//*[@class='table']")
