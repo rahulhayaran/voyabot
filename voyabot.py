@@ -101,11 +101,11 @@ class LinkedInBot(VoyaBot):
                     except KeyboardInterrupt:
                         self.close_driver()
                         if input("Save? Press ENTER for no."):
-                            return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools', 'Skills', 'Link'])
+                            return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools'])
                         quit()
                     except Exception as err:
                         logging.error(err)
-        return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools', 'Skills', 'Link'])
+        return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools'])
 
     # Scrapers
 
@@ -121,9 +121,9 @@ class LinkedInBot(VoyaBot):
         first, last = self.scrape_name()
         role, firm = self.scrape_xp()
         schools = self.scrape_schools()
-        skills = self.scrape_skills()
+        # skills = self.scrape_skills()
 
-        return (first, last, role, firm, ' | '.join(schools), ' | '.join(skills), profile_url)
+        return (first, last, role, firm, ' | '.join(schools))
 
     def scrape_name(self) -> tuple:
         def split_name(phrases):
@@ -278,7 +278,11 @@ class RocketBot(VoyaBot):
 
                 # find firm if new
                 if firm not in firms_df:
-                    df = self.do_search(firm)
+                    try:
+                        df = self.do_search(firm)
+                    except:
+                        df = None
+                        firms_df[firm] = None
                     if df is not None and df.iloc[0][0] != '-':
                         firms_df[firm] = self.clean_df(df)
                     else:
