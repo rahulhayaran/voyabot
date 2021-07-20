@@ -93,9 +93,8 @@ class LinkedInBot(VoyaBot):
                         links = self.do_search(self.process_search(search), int(pages))
                     except Exception as err:
                         logging.error(err)
+                    links = [l for l in links if l not in visited_links]
                     for link in tqdm(links):
-                        if link in visited_links:
-                            continue
                         try:
                             profile = self.scrape_profile(link)
                             if fuzz.partial_ratio(firm_name, profile[3]) > MATCH_RATIO:
