@@ -69,7 +69,7 @@ class LinkedInBot(VoyaBot):
 
         sign_in_button = self.driver.find_element_by_xpath('//*[@type="submit"]')
         sign_in_button.click()
-        sleep(0.5)
+        sleep(2)
 
     def scrape_data(self) -> pd.DataFrame:
         queries = self.inputs.get_queries()
