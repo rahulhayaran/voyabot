@@ -8,3 +8,4 @@ unidecode
 numpy
 logging
 tqdm
+fuzzywuzzy

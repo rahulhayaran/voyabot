@@ -9,6 +9,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
+from fuzzywuzzy import fuzz
 from numpy import random
 import logging
 from tqdm import tqdm
@@ -73,38 +74,42 @@ class LinkedInBot(VoyaBot):
     def scrape_data(self) -> pd.DataFrame:
         queries = self.inputs.get_queries()
         arr = []
+        visited_links = set()
+        try:
+            for firm_num, firm_name, firm_id, roles in queries:
+                print("Scraping {}, firm {} of {}".format(firm_name, firm_num + 1, len(queries)))
+                bot_sleep(3)
 
-        for firm_num, firm_name, firm_id, roles in queries:
-            print("Scraping {}, firm {} of {}".format(firm_name, firm_num + 1, len(queries)))
-            bot_sleep(3)
+                query_url = "https://www.linkedin.com/search/results/people/?currentCompany=%5B\"" + str(firm_id) + "\"%5D&geoUrn=%5B\"103644278\"%5D"
+                for role_num, search in enumerate(roles.split(', ')):
 
-            query_url = "https://www.linkedin.com/search/results/people/?currentCompany=%5B\"" + str(firm_id) + "\"%5D&geoUrn=%5B\"103644278\"%5D"
-            for role_num, search in enumerate(roles.split(', ')):
-
-                print("Scraping {}, role {} of {}".format(search, role_num + 1, len(roles.split(", "))))
-                bot_sleep(1)
-                self.driver.get(query_url)
-                pages = LINKEDIN_PAGES
-                if " - " in search:
-                    search, pages = search.split(" - ")
-                try:
-                    links = self.do_search(self.process_search(search), int(pages))
-                except Exception as err:
-                    logging.error(err)
-                for link in tqdm(links):
+                    print("Scraping {}, role {} of {}".format(search, role_num + 1, len(roles.split(", "))))
+                    bot_sleep(1)
+                    self.driver.get(query_url)
+                    pages = LINKEDIN_PAGES
+                    if " - " in search:
+                        search, pages = search.split(" - ")
                     try:
-                        profile = self.scrape_profile(link)
-                        if firm_name in profile[3]:
-                            arr.append(profile)
-                    except NoSuchElementException as err:
-                        logging.error("Profile not fully loaded:", link)
-                    except KeyboardInterrupt:
-                        self.close_driver()
-                        if input("Save? Press ENTER for no."):
-                            return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools'])
-                        quit()
+                        links = self.do_search(self.process_search(search), int(pages))
                     except Exception as err:
                         logging.error(err)
+                    for link in tqdm(links):
+                        if link in visited_links:
+                            continue
+                        try:
+                            profile = self.scrape_profile(link)
+                            if fuzz.partial_ratio(firm_name, profile[3]) > MATCH_RATIO:
+                                arr.append(profile)
+                        except NoSuchElementException as err:
+                            logging.error("Profile not fully loaded:", link)
+                        except Exception as err:
+                            logging.error(err)
+                    visited_links.update(links)
+        except KeyboardInterrupt:
+            self.close_driver()
+            if input("Save? Press ENTER for no."):
+                return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools'])
+            quit()
         return pd.DataFrame(arr, columns=['First', 'Last', 'Role', 'Firm', 'Schools'])
 
     # Scrapers

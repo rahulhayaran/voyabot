@@ -29,6 +29,7 @@ LINKEDIN_ROLES_TO_REMOVE = ['Intern', 'Contractor', 'Driver', 'Cook', 'Server', 
 LINKEDIN_SCHOOLS_TO_FLAG = ['Berkeley', 'Haas']  # these are schools whose alumni you want tracked
 SLEEP_SPEED = 1 # the length of sleep is scaled by this factor, so 0.5 halves the wait time
 SLEEP_NOISE = 0.25 # adds uniform noise from 0 to this cutoff to each sleep, set to 0 to disable
+MATCH_RATIO = 75 # specificies how close scraped firm names must be to the target firm name
 
 # RocketBot
 ROCKET_GENERAL_TEMPLATE_FREQ_THRESHOLD = 25 # this is the minimum frequency (0-100) an email template must have on RocketReach to be included
