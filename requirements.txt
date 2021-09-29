@@ -6,7 +6,6 @@ selenium
 webdriver-manager
 unidecode
 numpy
-logging
 tqdm
 fuzzywuzzy
 python-Levenshtein
