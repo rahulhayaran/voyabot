@@ -22,8 +22,8 @@ pip install -r requirements.txt
 4. Create a file called `parameters.py` and fill it up with the appropriate information. An example is provided below
 ```python
 # LinkedInBot
-LINKEDIN_USERNAME = 'petez@berkeley.edu' # type your LinkedIn username here in single quotes
-LINKEDIN_PASSWORD = 'QpWoEi102938!' # type your LinkedIn password here in single quotes
+LINKEDIN_USERNAME = '' # type your LinkedIn username here in single quotes
+LINKEDIN_PASSWORD = '' # type your LinkedIn password here in single quotes
 LINKEDIN_PAGES = 1
 LINKEDIN_ROLES_TO_REMOVE = ['Intern', 'Contractor', 'Driver', 'Cook', 'Server', 'Associate', 'Creator']  # these are roles you want removed from your searches
 LINKEDIN_SCHOOLS_TO_FLAG = ['Berkeley', 'Haas']  # these are schools whose alumni you want tracked
