@@ -91,19 +91,20 @@ class LinkedInBot(VoyaBot):
                         search, pages = search.split(" - ")
                     try:
                         links = self.do_search(self.process_search(search), int(pages))
+                        links = [l for l in links if l not in visited_links]
+                        for link in tqdm(links):
+                            try:
+                                profile = self.scrape_profile(link)
+                                if fuzz.partial_ratio(firm_name, profile[3]) > MATCH_RATIO:
+                                    arr.append(profile)
+                            except NoSuchElementException as err:
+                                logging.error("Profile not fully loaded:", link)
+                            except Exception as err:
+                                logging.error(err)
+                        visited_links.update(links)
                     except Exception as err:
                         logging.error(err)
-                    links = [l for l in links if l not in visited_links]
-                    for link in tqdm(links):
-                        try:
-                            profile = self.scrape_profile(link)
-                            if fuzz.partial_ratio(firm_name, profile[3]) > MATCH_RATIO:
-                                arr.append(profile)
-                        except NoSuchElementException as err:
-                            logging.error("Profile not fully loaded:", link)
-                        except Exception as err:
-                            logging.error(err)
-                    visited_links.update(links)
+                    
         except KeyboardInterrupt:
             self.close_driver()
             if input("Save? Press ENTER for no."):
