@@ -104,7 +104,6 @@ class LinkedInBot(VoyaBot):
                         visited_links.update(links)
                     except Exception as err:
                         logging.error(err)
-                    
         except KeyboardInterrupt:
             self.close_driver()
             if input("Save? Press ENTER for no."):
