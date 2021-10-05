@@ -288,7 +288,10 @@ class RocketBot(VoyaBot):
                         df = None
                         firms_df[firm] = None
                     if df is not None and df.iloc[0][0] != '-':
-                        firms_df[firm] = self.clean_df(df)
+                        try:
+                             firms_df[firm] = self.clean_df(df)
+                        except:
+                             firms_df[firm] = None
                     else:
                         firms_df[firm] = None
 
