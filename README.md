@@ -19,6 +19,8 @@ cd voyabot
 pip install -r requirements.txt --user
 ```
 
+Note that if the following command fails, you should try to use `pip3` instead of `pip`.
+
 4. Create a file called `parameters.py` and fill it up with the appropriate information. An example is provided below
 ```python
 # LinkedInBot
