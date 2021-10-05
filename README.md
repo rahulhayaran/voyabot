@@ -16,7 +16,7 @@ git clone https://github.com/rahulhayaran/voyabot.git
 3. `cd` into the repo and use the package manager [`pip`](https://pip.pypa.io/en/stable/) to install all necessary packages.
 ```bash
 cd voyabot
-pip install -r requirements.txt
+pip install -r requirements.txt --user
 ```
 
 4. Create a file called `parameters.py` and fill it up with the appropriate information. An example is provided below
